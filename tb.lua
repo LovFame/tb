@@ -1,5 +1,5 @@
 -- Triggerbot con menú ajustable para Xeno Executor
--- Versión: Dispara en cualquier parte del cuerpo
+-- Versión: Dispara en cualquier parte del cuerpo (BARRA DE PRECISIÓN CORREGIDA)
 local Triggerbot = {}
 Triggerbot.__index = Triggerbot
 
@@ -12,6 +12,7 @@ function Triggerbot.new()
     self.WallCheck = false
     self.Range = 1000 -- Rango máximo en studs
     self.AimAnywhere = true -- Siempre true, dispara en cualquier parte
+    self.Dragging = false
     
     -- Crear GUI
     self:CreateGUI()
@@ -27,7 +28,7 @@ function Triggerbot:CreateGUI()
     -- Frame principal
     local mainFrame = Instance.new("Frame")
     mainFrame.Name = "MainFrame"
-    mainFrame.Size = UDim2.new(0, 250, 0, 280)
+    mainFrame.Size = UDim2.new(0, 250, 0, 260)
     mainFrame.Position = UDim2.new(0, 50, 0, 50)
     mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     mainFrame.BorderSizePixel = 0
@@ -67,6 +68,7 @@ function Triggerbot:CreateGUI()
     precisionLabel.Font = Enum.Font.Gotham
     precisionLabel.Parent = mainFrame
     
+    -- Frame del slider (fondo)
     local sliderFrame = Instance.new("Frame")
     sliderFrame.Size = UDim2.new(0.9, 0, 0, 20)
     sliderFrame.Position = UDim2.new(0.05, 0, 0, 115)
@@ -74,6 +76,7 @@ function Triggerbot:CreateGUI()
     sliderFrame.BorderSizePixel = 0
     sliderFrame.Parent = mainFrame
     
+    -- Botón del slider (barra de progreso)
     local sliderBtn = Instance.new("TextButton")
     sliderBtn.Size = UDim2.new(self.Precision / 100, 0, 1, 0)
     sliderBtn.BackgroundColor3 = Color3.fromRGB(0, 160, 255)
@@ -125,29 +128,59 @@ function Triggerbot:CreateGUI()
         self.Enabled = false
     end)
     
-    -- Funcionalidad del slider
-    local dragging = false
+    -- FUNCIONALIDAD DEL SLIDER CORREGIDA
+    local UserInputService = game:GetService("UserInputService")
+    local RunService = game:GetService("RunService")
+    
+    -- Detectar cuando se presiona el slider
     sliderBtn.MouseButton1Down:Connect(function()
-        dragging = true
+        self.Dragging = true
     end)
     
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
+    -- Detectar cuando se suelta el mouse en cualquier parte
+    UserInputService.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
+            self.Dragging = false
         end
     end)
     
-    game:GetService("RunService").RenderStepped:Connect(function()
-        if dragging then
-            local mousePos = game:GetService("UserInputService"):GetMouseLocation()
+    -- Actualizar posición del slider mientras se arrastra
+    RunService.RenderStepped:Connect(function()
+        if self.Dragging then
+            -- Obtener posición del mouse
+            local mousePos = UserInputService:GetMouseLocation()
+            
+            -- Obtener posición y tamaño del sliderFrame en coordenadas absolutas
             local sliderPos = sliderFrame.AbsolutePosition.X
             local sliderSize = sliderFrame.AbsoluteSize.X
             
-            local newWidth = math.clamp((mousePos - sliderPos) / sliderSize, 0, 1)
+            -- Calcular el nuevo ancho (0-1)
+            local newWidth = (mousePos - sliderPos) / sliderSize
+            newWidth = math.clamp(newWidth, 0, 1) -- Limitar entre 0 y 1
+            
+            -- Actualizar tamaño del botón
             sliderBtn.Size = UDim2.new(newWidth, 0, 1, 0)
+            
+            -- Actualizar valor de precisión (0-100)
             self.Precision = math.floor(newWidth * 100)
+            
+            -- Actualizar texto
             precisionLabel.Text = "PRECISION: " .. self.Precision .. "%"
         end
+    end)
+    
+    -- También permitir hacer clic en cualquier parte del sliderFrame para ajustar
+    sliderFrame.MouseButton1Click:Connect(function()
+        local mousePos = UserInputService:GetMouseLocation()
+        local sliderPos = sliderFrame.AbsolutePosition.X
+        local sliderSize = sliderFrame.AbsoluteSize.X
+        
+        local newWidth = (mousePos - sliderPos) / sliderSize
+        newWidth = math.clamp(newWidth, 0, 1)
+        
+        sliderBtn.Size = UDim2.new(newWidth, 0, 1, 0)
+        self.Precision = math.floor(newWidth * 100)
+        precisionLabel.Text = "PRECISION: " .. self.Precision .. "%"
     end)
     
     -- Conexiones de botones
@@ -226,22 +259,11 @@ function Triggerbot:GetTargetUnderCrosshair()
                     return nil
                 end
                 
-                -- Verificar rango (aunque el rayo ya tiene rango, verificamos por seguridad)
+                -- Verificar rango
                 if self:IsTargetInRange(hitPart) then
-                    -- Aplicar precisión
+                    -- Aplicar precisión (0-100)
                     if math.random(1, 100) <= self.Precision then
-                        -- Visible check (si está activado, el rayo ya verificó visibilidad)
-                        if self.VisibleCheck then
-                            -- El rayo ya confirmó que es visible, pero verificamos wall check si está activado
-                            if self.WallCheck then
-                                -- Aquí podrías agregar lógica adicional para paredes
-                                return hitPart
-                            else
-                                return hitPart
-                            end
-                        else
-                            return hitPart
-                        end
+                        return hitPart
                     end
                 end
             end
@@ -261,8 +283,8 @@ function Triggerbot:Start()
             -- Simular clic
             mouse1click()
             
-            -- Pequeña pausa visual (opcional, comenta si quieres máximo rendimiento)
-            wait(0.01)
+            -- Pequeña pausa para evitar clicks demasiado rápidos
+            wait(0.03)
         end
     end)
 end
