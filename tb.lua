@@ -8,7 +8,7 @@ local Players = game:GetService("Players")
 -- Variables
 local enabled = false
 local knifeCheck = true
-local forceFieldCheck = true
+local forceFieldCheck = false -- Lo dejamos false por defecto
 local holdMode = true
 local precision = 50
 local triggerDelay = 1
@@ -166,7 +166,7 @@ end
 -- Checkboxes de Trigger Bot
 local enableTrigger = createCheckbox("Enable Trigger Bot", false)
 local knifeCheckbox = createCheckbox("Knife Check", true)
-local forceFieldCheckbox = createCheckbox("Force Field Check", true)
+local forceFieldCheckbox = createCheckbox("Force Field Check", false)
 
 -- ===== CONFIGURACIÓN DE TECLA =====
 local keyFrame = Instance.new("Frame")
@@ -177,7 +177,7 @@ keyFrame.Parent = scrollingFrame
 local keyLabel = Instance.new("TextLabel")
 keyLabel.Size = UDim2.new(1, 0, 0, 25)
 keyLabel.BackgroundTransparency = 1
-keyLabel.Text = "Tecla de activación"
+keyLabel.Text = "Keybind"
 keyLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 keyLabel.Font = Enum.Font.Gotham
 keyLabel.TextSize = 14
@@ -324,7 +324,7 @@ end)
 modeBtn.MouseButton1Click:Connect(function()
     holdMode = not holdMode
     modeBtn.Text = holdMode and "HOLD" or "TOGGLE"
-    modeBtn.BackgroundColor3 = holdMode and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(0, 150, 255)
+    modeBtn.BackgroundColor3 = holdMode and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(255, 150, 0)
 end)
 
 keySelectBtn.MouseButton1Click:Connect(function()
@@ -444,19 +444,15 @@ end)
 -- ===== SISTEMA DE MINIMIZADO CON CTRL =====
 local guiVisible = true
 
-
 local function isCtrlKey(input)
-    return input.KeyCode == Enum.KeyCode.RightControl
+    return input.KeyCode == Enum.KeyCode.LeftControl or input.KeyCode == Enum.KeyCode.RightControl
 end
 
 UserInputService.InputBegan:Connect(function(input)
- 
     if input.UserInputType == Enum.UserInputType.Keyboard and isCtrlKey(input) then
-        -- Solo alternar la visibilidad, sin importar dónde está el mouse
         guiVisible = not guiVisible
         gui.Enabled = guiVisible
         
-        -- Pequeño feedback visual en consola (opcional)
         if guiVisible then
             print("🔓 GUI abierta con CTRL")
         else
@@ -477,7 +473,7 @@ closeBtn.MouseButton1Click:Connect(function()
     enabled = false
 end)
 
--- ===== SISTEMA DE ACTIVACIÓN POR TECLA (CORREGIDO) =====
+-- ===== SISTEMA DE ACTIVACIÓN POR TECLA =====
 local function isKeyPressed(input)
     if typeof(holdKey) == "EnumItem" then
         return input.UserInputType == holdKey
@@ -490,10 +486,8 @@ UserInputService.InputBegan:Connect(function(input)
     if isKeyPressed(input) then
         keyPressed = true
         if holdMode then
-            -- En HOLD mode: activa mientras está presionado
             triggerActive = true
         else
-            -- En TOGGLE mode: cambia el estado con cada presión
             triggerActive = not triggerActive
         end
     end
@@ -503,14 +497,12 @@ UserInputService.InputEnded:Connect(function(input)
     if isKeyPressed(input) then
         keyPressed = false
         if holdMode then
-            -- En HOLD mode: desactiva cuando se suelta
             triggerActive = false
         end
-        -- En TOGGLE mode: no hace nada al soltar
     end
 end)
 
--- ===== FUNCIÓN PARA DETECTAR CUCHILLO =====
+-- ===== FUNCIÓN PARA DETECTAR CUCHILLO (CORREGIDA) =====
 local function hasKnifeEquipped()
     local character = player.Character
     if not character then return false end
@@ -518,8 +510,18 @@ local function hasKnifeEquipped()
     local tool = character:FindFirstChildOfClass("Tool")
     if tool then
         local toolName = tool.Name:lower()
-        if toolName:find("knife") or toolName == "knife" then
-            return true
+        -- Lista completa de nombres de cuchillos en Da Hood
+        local knifeNames = {
+            "knife", "cuchillo", "blade", "combat", "hunting",
+            "butterfly", "switchblade", "dagger", "machete", "katana",
+            "karambit", "stiletto", "tactical", "throwing"
+        }
+        
+        for _, name in ipairs(knifeNames) do
+            if toolName:find(name) then
+                print("🔪 Cuchillo detectado: " .. tool.Name) -- Debug
+                return true
+            end
         end
     end
     return false
@@ -534,13 +536,11 @@ local function getDistanceFromTarget(targetPart)
     return (rootPart.Position - targetPart.Position).Magnitude
 end
 
--- ===== FUNCIÓN PRINCIPAL DEL TRIGGERBOT (CORREGIDA) =====
+-- ===== FUNCIÓN PRINCIPAL DEL TRIGGERBOT =====
 local lastShotTime = 0
 
 RunService.Heartbeat:Connect(function()
-    -- SOLO dispara si:
-    -- 1. El triggerbot está habilitado por el checkbox O la tecla está activa
-    -- 2. Enable Trigger Bot debe estar activado para que funcione con tecla
+    -- SOLO dispara si enabled está activado Y la tecla está presionada
     local shouldTrigger = enabled and triggerActive
     
     if not shouldTrigger then return end
@@ -559,7 +559,7 @@ RunService.Heartbeat:Connect(function()
     -- VERIFICACIÓN DE RANGO
     local distance = getDistanceFromTarget(target)
     if distance > maxDistance then
-        return -- Fuera de rango, no dispara
+        return
     end
     
     local hum = model:FindFirstChildOfClass("Humanoid")
@@ -568,14 +568,9 @@ RunService.Heartbeat:Connect(function()
     local plr = Players:GetPlayerFromCharacter(model)
     if not plr or plr == player then return end
     
-    -- Knife Check
+    -- KNIFE CHECK - AHORA FUNCIONA
     if knifeCheck and hasKnifeEquipped() then
-        return
-    end
-    
-    -- Force Field Check 
-    if forceFieldCheck then
-        -- Aquí iría la lógica de force field si existe
+        return -- No dispara si tiene cuchillo equipado
     end
     
     if math.random(1, 100) <= precision then
@@ -583,13 +578,3 @@ RunService.Heartbeat:Connect(function()
         lastShotTime = currentTime
     end
 end)
-
--- ===== MENSAJE DE INICIO =====
-print("✅ TRIGGERBOT CARGADO")
-print("📏 Max Distance: " .. maxDistance .. " studs")
-print("🎯 Precision: " .. precision .. "%")
-print("⚡ Delay: " .. triggerDelay .. "ms")
-print("🔑 Tecla: " .. keySelectBtn.Text)
-print("🔄 Modo: " .. (holdMode and "HOLD (dispara mientras presionas)" or "TOGGLE (dispara hasta que presiones otra vez)"))
-print("⌨️ CTRL para abrir/cerrar la GUI")
-print("⚠️ IMPORTANTE: Debes tener 'Enable Trigger Bot' ACTIVADO y presionar la tecla para disparar")
