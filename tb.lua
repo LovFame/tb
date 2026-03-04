@@ -8,14 +8,14 @@ local Players = game:GetService("Players")
 -- Variables
 local enabled = false
 local knifeCheck = true
-local forceFieldCheck = false -- Lo dejamos false por defecto
+local forceFieldCheck = false
 local holdMode = true
 local precision = 50
 local triggerDelay = 1
-local maxDistance = 500 -- Rango en studs
+local maxDistance = 500 
 
 -- Variables para tecla personalizable
-local holdKey = Enum.UserInputType.MouseButton2 -- Click derecho por defecto
+local holdKey = Enum.UserInputType.MouseButton2 
 local keyPressed = false
 local triggerActive = false
 local isSelectingKey = false
@@ -40,7 +40,7 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 8)
 corner.Parent = main
 
--- Título
+-- Ttulo
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 45)
 title.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
@@ -54,7 +54,7 @@ local titleCorner = Instance.new("UICorner")
 titleCorner.CornerRadius = UDim.new(0, 8)
 titleCorner.Parent = title
 
--- Botón de cerrar
+-- Boton de cerrar
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 32, 0, 32)
 closeBtn.Position = UDim2.new(1, -40, 0, 6)
@@ -99,7 +99,7 @@ layout.Padding = UDim.new(0, 15)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 layout.Parent = scrollingFrame
 
--- ===== SECCIÓN TRIGGER BOT =====
+-- = SECCION TRIGGER BOT =
 local triggerSection = Instance.new("Frame")
 triggerSection.Size = UDim2.new(1, 0, 0, 35)
 triggerSection.BackgroundTransparency = 1
@@ -121,7 +121,7 @@ triggerLabel.TextSize = 16
 triggerLabel.TextXAlignment = Enum.TextXAlignment.Left
 triggerLabel.Parent = triggerSection
 
--- Función para crear checkboxes
+-- Funcion para crear checkboxes
 local function createCheckbox(text, default)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 28)
@@ -163,12 +163,12 @@ local function createCheckbox(text, default)
     return {frame = frame, checkbox = checkbox, checkMark = checkMark, value = default}
 end
 
--- Checkboxes de Trigger Bot
+
 local enableTrigger = createCheckbox("Enable Trigger Bot", false)
 local knifeCheckbox = createCheckbox("Knife Check", true)
 local forceFieldCheckbox = createCheckbox("Force Field Check", false)
 
--- ===== CONFIGURACIÓN DE TECLA =====
+
 local keyFrame = Instance.new("Frame")
 keyFrame.Size = UDim2.new(1, 0, 0, 70)
 keyFrame.BackgroundTransparency = 1
@@ -184,7 +184,7 @@ keyLabel.TextSize = 14
 keyLabel.TextXAlignment = Enum.TextXAlignment.Left
 keyLabel.Parent = keyFrame
 
--- Botón de modo (Hold/Toggle)
+-- modo (Hold/Toggle)
 local modeBtn = Instance.new("TextButton")
 modeBtn.Size = UDim2.new(0.48, 0, 0, 35)
 modeBtn.Position = UDim2.new(0, 0, 0, 30)
@@ -199,7 +199,7 @@ local modeCorner = Instance.new("UICorner")
 modeCorner.CornerRadius = UDim.new(0, 6)
 modeCorner.Parent = modeBtn
 
--- Botón para seleccionar tecla
+
 local keySelectBtn = Instance.new("TextButton")
 keySelectBtn.Size = UDim2.new(0.48, 0, 0, 35)
 keySelectBtn.Position = UDim2.new(0.52, 0, 0, 30)
@@ -214,7 +214,7 @@ local keyCorner = Instance.new("UICorner")
 keyCorner.CornerRadius = UDim.new(0, 6)
 keyCorner.Parent = keySelectBtn
 
--- ===== SECCIÓN CONFIGURATION =====
+
 local configSection = Instance.new("Frame")
 configSection.Size = UDim2.new(1, 0, 0, 35)
 configSection.BackgroundTransparency = 1
@@ -236,7 +236,7 @@ configLabel.TextSize = 16
 configLabel.TextXAlignment = Enum.TextXAlignment.Left
 configLabel.Parent = configSection
 
--- Función para crear sliders
+
 local function createSlider(text, value, min, max, suffix)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 50)
@@ -293,12 +293,12 @@ local function createSlider(text, value, min, max, suffix)
     return {frame = frame, sliderFill = sliderFill, valueLabel = valueLabel, value = value, min = min, max = max, suffix = suffix, button = sliderButton}
 end
 
--- Sliders de Configuration
+
 local precisionSlider = createSlider("Precision", 50, 0, 100, "")
 local delaySlider = createSlider("Trigger Delay (ms)", 1, 0, 100, " ms")
 local distanceSlider = createSlider("Max Distance", 500, 0, 5000, "")
 
--- ===== FUNCIONALIDAD DE CHECKBOXES =====
+
 enableTrigger.checkbox.MouseButton1Click:Connect(function()
     enabled = not enabled
     enableTrigger.value = enabled
@@ -320,7 +320,7 @@ forceFieldCheckbox.checkbox.MouseButton1Click:Connect(function()
     forceFieldCheckbox.checkMark.Text = forceFieldCheck and "✓" or ""
 end)
 
--- ===== FUNCIONALIDAD DE MODO Y TECLA =====
+
 modeBtn.MouseButton1Click:Connect(function()
     holdMode = not holdMode
     modeBtn.Text = holdMode and "HOLD" or "TOGGLE"
@@ -356,7 +356,7 @@ UserInputService.InputBegan:Connect(function(input)
     end
 end)
 
--- ===== FUNCIONALIDAD DE SLIDERS =====
+
 local draggingPrecision = false
 local draggingDelay = false
 local draggingDistance = false
@@ -441,7 +441,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- ===== SISTEMA DE MINIMIZADO CON CTRL =====
+
 local guiVisible = true
 
 local function isCtrlKey(input)
@@ -454,15 +454,15 @@ UserInputService.InputBegan:Connect(function(input)
         gui.Enabled = guiVisible
         
         if guiVisible then
-            print("🔓 GUI abierta con CTRL")
+            print("GUI abierta con CTRL")
         else
-            print("🔒 GUI cerrada con CTRL")
+            print("GUI cerrada con CTRL")
         end
         return
     end
 end)
 
--- El botón de minimizar también funciona
+
 minimizeBtn.MouseButton1Click:Connect(function()
     guiVisible = false
     gui.Enabled = false
@@ -473,7 +473,7 @@ closeBtn.MouseButton1Click:Connect(function()
     enabled = false
 end)
 
--- ===== SISTEMA DE ACTIVACIÓN POR TECLA =====
+
 local function isKeyPressed(input)
     if typeof(holdKey) == "EnumItem" then
         return input.UserInputType == holdKey
@@ -502,7 +502,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- ===== FUNCIÓN PARA DETECTAR CUCHILLO (CORREGIDA) =====
+-- FUNCIN PARA DETECTAR CUCHILLO
 local function hasKnifeEquipped()
     local character = player.Character
     if not character then return false end
@@ -510,7 +510,7 @@ local function hasKnifeEquipped()
     local tool = character:FindFirstChildOfClass("Tool")
     if tool then
         local toolName = tool.Name:lower()
-        -- Lista completa de nombres de cuchillos en Da Hood
+        
         local knifeNames = {
             "knife", "cuchillo", "blade", "combat", "hunting",
             "butterfly", "switchblade", "dagger", "machete", "katana",
@@ -519,7 +519,7 @@ local function hasKnifeEquipped()
         
         for _, name in ipairs(knifeNames) do
             if toolName:find(name) then
-                print("🔪 Cuchillo detectado: " .. tool.Name) -- Debug
+                print("Cuchillo detectado: " .. tool.Name) -- Debug
                 return true
             end
         end
@@ -527,7 +527,7 @@ local function hasKnifeEquipped()
     return false
 end
 
--- ===== FUNCIÓN PARA CALCULAR DISTANCIA =====
+
 local function getDistanceFromTarget(targetPart)
     local character = player.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return math.huge end
@@ -536,11 +536,11 @@ local function getDistanceFromTarget(targetPart)
     return (rootPart.Position - targetPart.Position).Magnitude
 end
 
--- ===== FUNCIÓN PRINCIPAL DEL TRIGGERBOT =====
+
 local lastShotTime = 0
 
 RunService.Heartbeat:Connect(function()
-    -- SOLO dispara si enabled está activado Y la tecla está presionada
+   
     local shouldTrigger = enabled and triggerActive
     
     if not shouldTrigger then return end
@@ -556,7 +556,7 @@ RunService.Heartbeat:Connect(function()
     local model = target.Parent
     if not model then return end
     
-    -- VERIFICACIÓN DE RANGO
+
     local distance = getDistanceFromTarget(target)
     if distance > maxDistance then
         return
@@ -568,9 +568,9 @@ RunService.Heartbeat:Connect(function()
     local plr = Players:GetPlayerFromCharacter(model)
     if not plr or plr == player then return end
     
-    -- KNIFE CHECK - AHORA FUNCIONA
+    -- KNIFE CHECK 
     if knifeCheck and hasKnifeEquipped() then
-        return -- No dispara si tiene cuchillo equipado
+        return 
     end
     
     if math.random(1, 100) <= precision then
