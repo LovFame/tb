@@ -512,9 +512,7 @@ local function hasKnifeEquipped()
         local toolName = tool.Name:lower()
         
         local knifeNames = {
-            "knife", "cuchillo", "blade", "combat", "hunting",
-            "butterfly", "switchblade", "dagger", "machete", "katana",
-            "karambit", "stiletto", "tactical", "throwing"
+            "knife", "cuchillo"
         }
         
         for _, name in ipairs(knifeNames) do
