@@ -1,4 +1,4 @@
--- TRIGGERBOT - DA HOOD (VERSIÓN CORREGIDA - FUNCIONA EL DISPARO)
+-- TRIGGERBOT - DA HOOD (VERSIÓN CORREGIDA - SIN FLASH ROJO)
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
 local UserInputService = game:GetService("UserInputService")
@@ -1044,7 +1044,7 @@ end
 
 local lastShotTime = 0
 
--- FUNCIÓN DE DISPARO MEJORADA - MÚLTIPLES MÉTODOS
+-- FUNCIÓN DE DISPARO MEJORADA - SIN EFECTOS VISUALES
 local function shoot()
     -- Método 1: mouse1click (el más común)
     local success, error = pcall(function()
@@ -1080,29 +1080,6 @@ local function shoot()
         task.wait(0.01)
         UserInputService:SendMouseButtonEvent(mouse.X, mouse.Y, 0, false, game, 0)
     end)
-    
-    -- Efecto visual al disparar
-    local flash = Instance.new("Frame")
-    flash.Size = UDim2.new(1, 0, 1, 0)
-    flash.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    flash.BackgroundTransparency = 0.7
-    flash.Parent = gui
-    flash.ZIndex = 1000
-    
-    TweenService:Create(flash, TweenInfo.new(0.15), {BackgroundTransparency = 1}):Play()
-    
-    -- Efecto de brillo en el botón
-    TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.1), {
-        BackgroundColor3 = Color3.fromRGB(255, 100, 100)
-    }):Play()
-    
-    task.wait(0.1)
-    TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.1), {
-        BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-    }):Play()
-    
-    task.wait(0.05)
-    flash:Destroy()
 end
 
 RunService.Heartbeat:Connect(function()
