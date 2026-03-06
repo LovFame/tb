@@ -992,12 +992,12 @@ UserInputService.InputBegan:Connect(function(input)
                 TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.2), {
                     BackgroundColor3 = Color3.fromRGB(0, 200, 255)
                 }):Play()
-                showNotification("TRIGGER", "🔴 ACTIVADO (HOLD)", 1, "success")
+
             end
         else
             triggerActive = not triggerActive
             if enabled then
-                showNotification("TRIGGER", triggerActive and "🔴 ACTIVADO" or "⚪ DESACTIVADO", 1, triggerActive and "success" or "error")
+
             end
         end
     end
@@ -1012,7 +1012,7 @@ UserInputService.InputEnded:Connect(function(input)
                 TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.2), {
                     BackgroundColor3 = Color3.fromRGB(0, 150, 255)
                 }):Play()
-                showNotification("TRIGGER", "⚪ DESACTIVADO", 1, "error")
+
             end
         end
     end
