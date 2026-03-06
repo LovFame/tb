@@ -1,10 +1,11 @@
--- TRIGGERBOT - DA HOOD (VERSIÓN CORREGIDA - SIN OVERLAY NEGRO)
+-- TRIGGERBOT - DA HOOD (VERSIÓN CORREGIDA - FUNCIONA EL DISPARO)
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
 
 -- Variables
 local enabled = false
@@ -26,6 +27,9 @@ local guiVisible = true
 local notificationDuration = 2
 local currentNotifications = {}
 
+-- Variable para controlar el disparo
+local canShoot = true
+
 -- GUI Principal
 local gui = Instance.new("ScreenGui")
 gui.Name = "TriggerBotGUI"
@@ -34,7 +38,9 @@ gui.ResetOnSpawn = false
 gui.DisplayOrder = 100
 gui.IgnoreGuiInset = true
 gui.Enabled = true
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
+-- MAIN FRAME (Toda la GUI igual que antes, sin cambios)
 local main = Instance.new("Frame")
 main.Size = UDim2.new(0, 400, 0, 520)
 main.Position = UDim2.new(0.5, -200, 0.5, -260)
@@ -986,6 +992,7 @@ UserInputService.InputBegan:Connect(function(input)
                 TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.2), {
                     BackgroundColor3 = Color3.fromRGB(0, 200, 255)
                 }):Play()
+                showNotification("TRIGGER", "🔴 ACTIVADO (HOLD)", 1, "success")
             end
         else
             triggerActive = not triggerActive
@@ -1005,6 +1012,7 @@ UserInputService.InputEnded:Connect(function(input)
                 TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.2), {
                     BackgroundColor3 = Color3.fromRGB(0, 150, 255)
                 }):Play()
+                showNotification("TRIGGER", "⚪ DESACTIVADO", 1, "error")
             end
         end
     end
@@ -1042,6 +1050,67 @@ end
 
 local lastShotTime = 0
 
+-- FUNCIÓN DE DISPARO MEJORADA - MÚLTIPLES MÉTODOS
+local function shoot()
+    -- Método 1: mouse1click (el más común)
+    local success, error = pcall(function()
+        mouse1click()
+    end)
+    
+    -- Método 2: VirtualInputManager (más potente)
+    if not success then
+        pcall(function()
+            VirtualInputManager:SendMouseButtonEvent(
+                mouse.X, 
+                mouse.Y, 
+                0, -- Botón izquierdo (0 = izquierdo, 1 = derecho, 2 = medio)
+                true, -- Presionar
+                game, -- Objeto
+                0 -- ID
+            )
+            task.wait(0.01)
+            VirtualInputManager:SendMouseButtonEvent(
+                mouse.X, 
+                mouse.Y, 
+                0, 
+                false, -- Soltar
+                game, 
+                0
+            )
+        end)
+    end
+    
+    -- Método 3: Simular clic mediante UserInputService
+    pcall(function()
+        UserInputService:SendMouseButtonEvent(mouse.X, mouse.Y, 0, true, game, 0)
+        task.wait(0.01)
+        UserInputService:SendMouseButtonEvent(mouse.X, mouse.Y, 0, false, game, 0)
+    end)
+    
+    -- Efecto visual al disparar
+    local flash = Instance.new("Frame")
+    flash.Size = UDim2.new(1, 0, 1, 0)
+    flash.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    flash.BackgroundTransparency = 0.7
+    flash.Parent = gui
+    flash.ZIndex = 1000
+    
+    TweenService:Create(flash, TweenInfo.new(0.15), {BackgroundTransparency = 1}):Play()
+    
+    -- Efecto de brillo en el botón
+    TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.1), {
+        BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+    }):Play()
+    
+    task.wait(0.1)
+    TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.1), {
+        BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+    }):Play()
+    
+    task.wait(0.05)
+    flash:Destroy()
+end
+
 RunService.Heartbeat:Connect(function()
     local shouldTrigger = enabled and triggerActive
     
@@ -1075,37 +1144,12 @@ RunService.Heartbeat:Connect(function()
     end
     
     if math.random(1, 100) <= precision then
-        mouse1click()
+        shoot()
         lastShotTime = currentTime
-        
-        -- Efecto visual al disparar
-        if enabled then
-            -- Flash rojo
-            local flash = Instance.new("Frame")
-            flash.Size = UDim2.new(1, 0, 1, 0)
-            flash.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-            flash.BackgroundTransparency = 0.7
-            flash.Parent = gui
-            flash.ZIndex = 1000
-            
-            TweenService:Create(flash, TweenInfo.new(0.15), {BackgroundTransparency = 1}):Play()
-            
-            -- Efecto de brillo en el botón
-            TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.1), {
-                BackgroundColor3 = Color3.fromRGB(255, 100, 100)
-            }):Play()
-            
-            task.wait(0.1)
-            TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.1), {
-                BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-            }):Play()
-            
-            task.wait(0.05)
-            flash:Destroy()
-        end
     end
 end)
 
 -- Mensaje de bienvenida
 showNotification("TRIGGER BOT", "🚀 Cargado exitosamente", 3, "success")
 showNotification("CONTROLES", "CTRL para abrir/cerrar", 3, "info")
+showNotification("DISPARO", "Múltiples métodos activados", 3, "info")
