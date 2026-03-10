@@ -1,4 +1,4 @@
--- TRIGGERBOT - DA HOOD (VERSIÓN CORREGIDA - SIN FLASH ROJO)
+-- TRIGGERBOT - DA HOOD (VERSIÓN LIMPIA, SIN HITBOX EXTENDER)
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
 local UserInputService = game:GetService("UserInputService")
@@ -6,6 +6,7 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
+local camera = workspace.CurrentCamera
 
 -- Variables
 local enabled = false
@@ -14,7 +15,7 @@ local forceFieldCheck = false
 local holdMode = true
 local precision = 50
 local triggerDelay = 1
-local maxDistance = 500 
+local maxDistance = 500
 
 -- Variables para tecla personalizable
 local holdKey = Enum.UserInputType.MouseButton2 
@@ -40,10 +41,10 @@ gui.IgnoreGuiInset = true
 gui.Enabled = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- MAIN FRAME (Toda la GUI igual que antes, sin cambios)
+-- MAIN FRAME
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 400, 0, 520)
-main.Position = UDim2.new(0.5, -200, 0.5, -260)
+main.Size = UDim2.new(0, 400, 0, 480)  -- Altura reducida porque quitamos la sección hitbox
+main.Position = UDim2.new(0.5, -200, 0.5, -240)
 main.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 main.BorderSizePixel = 0
 main.Active = true
@@ -53,7 +54,7 @@ main.ClipsDescendants = true
 main.ZIndex = 2
 main.Visible = true
 
--- Sombra mejorada
+-- Sombra
 local shadow = Instance.new("ImageLabel")
 shadow.Size = UDim2.new(1, 30, 1, 30)
 shadow.Position = UDim2.new(0, -15, 0, -15)
@@ -66,12 +67,10 @@ shadow.SliceCenter = Rect.new(10, 10, 118, 118)
 shadow.Parent = main
 shadow.ZIndex = 1
 
--- Bordes redondeados
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 16)
 corner.Parent = main
 
--- Borde decorativo con gradiente
 local border = Instance.new("Frame")
 border.Size = UDim2.new(1, 0, 1, 0)
 border.BackgroundTransparency = 1
@@ -84,7 +83,6 @@ local borderCorner = Instance.new("UICorner")
 borderCorner.CornerRadius = UDim.new(0, 16)
 borderCorner.Parent = border
 
--- Efecto de brillo en el borde
 local borderGlow = Instance.new("Frame")
 borderGlow.Size = UDim2.new(1, 0, 1, 0)
 borderGlow.BackgroundTransparency = 0.95
@@ -96,7 +94,6 @@ local borderGlowCorner = Instance.new("UICorner")
 borderGlowCorner.CornerRadius = UDim.new(0, 16)
 borderGlowCorner.Parent = borderGlow
 
--- Título
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 60)
 title.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
@@ -111,7 +108,6 @@ local titleCorner = Instance.new("UICorner")
 titleCorner.CornerRadius = UDim.new(0, 16)
 titleCorner.Parent = title
 
--- Gradiente del título
 local titleGradient = Instance.new("UIGradient")
 titleGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 150, 255)),
@@ -121,7 +117,6 @@ titleGradient.Color = ColorSequence.new({
 titleGradient.Rotation = 45
 titleGradient.Parent = title
 
--- Línea decorativa bajo el título
 local titleLine = Instance.new("Frame")
 titleLine.Size = UDim2.new(0.8, 0, 0, 2)
 titleLine.Position = UDim2.new(0.1, 0, 1, -2)
@@ -133,7 +128,6 @@ local titleLineCorner = Instance.new("UICorner")
 titleLineCorner.CornerRadius = UDim.new(1, 0)
 titleLineCorner.Parent = titleLine
 
--- Botón de cerrar
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 38, 0, 38)
 closeBtn.Position = UDim2.new(1, -48, 0, 11)
@@ -149,7 +143,6 @@ local closeCorner = Instance.new("UICorner")
 closeCorner.CornerRadius = UDim.new(0, 10)
 closeCorner.Parent = closeBtn
 
--- Botón de minimizar
 local minimizeBtn = Instance.new("TextButton")
 minimizeBtn.Size = UDim2.new(0, 38, 0, 38)
 minimizeBtn.Position = UDim2.new(1, -96, 0, 11)
@@ -165,7 +158,6 @@ local minimizeCorner = Instance.new("UICorner")
 minimizeCorner.CornerRadius = UDim.new(0, 10)
 minimizeCorner.Parent = minimizeBtn
 
--- Animación de hover para botones
 local function createHoverEffect(button, color, hoverColor)
     button.MouseEnter:Connect(function()
         TweenService:Create(button, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
@@ -187,7 +179,6 @@ end
 createHoverEffect(closeBtn, Color3.fromRGB(255, 70, 70), Color3.fromRGB(255, 100, 100))
 createHoverEffect(minimizeBtn, Color3.fromRGB(60, 60, 70), Color3.fromRGB(80, 80, 90))
 
--- Contenedor principal con scroll
 local scrollingFrame = Instance.new("ScrollingFrame")
 scrollingFrame.Size = UDim2.new(1, -30, 1, -70)
 scrollingFrame.Position = UDim2.new(0, 15, 0, 65)
@@ -202,7 +193,6 @@ scrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 scrollingFrame.ElasticBehavior = Enum.ElasticBehavior.Always
 scrollingFrame.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
 
--- Fondo con gradiente mejorado
 local gradientBg = Instance.new("UIGradient")
 gradientBg.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(28, 28, 35)),
@@ -212,7 +202,6 @@ gradientBg.Color = ColorSequence.new({
 gradientBg.Rotation = 45
 gradientBg.Parent = main
 
--- Patrón de puntos decorativo
 local dots = Instance.new("ImageLabel")
 dots.Size = UDim2.new(1, 0, 1, 0)
 dots.BackgroundTransparency = 1
@@ -229,7 +218,6 @@ layout.Padding = UDim.new(0, 15)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 layout.Parent = scrollingFrame
 
--- Conectar el cambio de CanvasSize automáticamente
 layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 20)
 end)
@@ -281,7 +269,7 @@ triggerIcon.TextSize = 24
 triggerIcon.Parent = triggerSection
 triggerIcon.ZIndex = 4
 
--- Función para crear checkboxes con animación y persistencia de color
+-- Función para crear checkboxes
 local function createCheckbox(text, default)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 35)
@@ -338,7 +326,6 @@ local function createCheckbox(text, default)
     label.Parent = frame
     label.ZIndex = 4
     
-    -- Hover effect
     checkbox.MouseEnter:Connect(function()
         if checkbox.BackgroundColor3 ~= Color3.fromRGB(0, 150, 255) then
             TweenService:Create(checkbox, TweenInfo.new(0.2), {
@@ -384,7 +371,6 @@ keyLabel.TextXAlignment = Enum.TextXAlignment.Left
 keyLabel.Parent = keyFrame
 keyLabel.ZIndex = 4
 
--- modo (Hold/Toggle)
 local modeBtn = Instance.new("TextButton")
 modeBtn.Size = UDim2.new(0.48, 0, 0, 45)
 modeBtn.Position = UDim2.new(0, 0, 0, 35)
@@ -413,7 +399,6 @@ local modeGlowCorner = Instance.new("UICorner")
 modeGlowCorner.CornerRadius = UDim.new(0, 11)
 modeGlowCorner.Parent = modeGlow
 
--- Efecto hover para modoBtn
 modeBtn.MouseEnter:Connect(function()
     TweenService:Create(modeBtn, TweenInfo.new(0.2), {
         BackgroundColor3 = holdMode and Color3.fromRGB(0, 170, 255) or Color3.fromRGB(255, 170, 0),
@@ -457,7 +442,6 @@ local keyGlowCorner = Instance.new("UICorner")
 keyGlowCorner.CornerRadius = UDim.new(0, 11)
 keyGlowCorner.Parent = keyGlow
 
--- Efecto hover para keySelectBtn
 keySelectBtn.MouseEnter:Connect(function()
     if not isSelectingKey then
         TweenService:Create(keySelectBtn, TweenInfo.new(0.2), {
@@ -523,7 +507,7 @@ configIcon.TextSize = 24
 configIcon.Parent = configSection
 configIcon.ZIndex = 4
 
--- Función para crear sliders con animación
+-- Función para crear sliders
 local function createSlider(text, value, min, max, suffix, color)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 60)
@@ -585,7 +569,6 @@ local function createSlider(text, value, min, max, suffix, color)
     sliderFillCorner.CornerRadius = UDim.new(1, 0)
     sliderFillCorner.Parent = sliderFill
     
-    -- Efecto de brillo
     local glow = Instance.new("Frame")
     glow.Size = UDim2.new(1, 0, 1, 0)
     glow.BackgroundTransparency = 0.7
@@ -604,7 +587,6 @@ local function createSlider(text, value, min, max, suffix, color)
     sliderButton.Parent = sliderBg
     sliderButton.ZIndex = 5
     
-    -- Puntos indicadores
     for i = 0, 4 do
         local point = Instance.new("Frame")
         point.Size = UDim2.new(0, 2, 0, 6)
@@ -625,7 +607,7 @@ local precisionSlider = createSlider("Precision", 50, 0, 100, "%", Color3.fromRG
 local delaySlider = createSlider("Trigger Delay", 1, 0, 100, "ms", Color3.fromRGB(255, 150, 0))
 local distanceSlider = createSlider("Max Distance", 500, 0, 5000, "", Color3.fromRGB(200, 100, 255))
 
--- Función para mostrar notificaciones mejorada
+-- Función para mostrar notificaciones
 local function showNotification(title, message, duration, type)
     duration = duration or notificationDuration
     
@@ -695,7 +677,6 @@ local function showNotification(title, message, duration, type)
     
     table.insert(currentNotifications, notif)
     
-    -- Animación de entrada
     notif.Position = UDim2.new(1, 0, 0, 20 + ((#currentNotifications-1) * 80))
     notif.Rotation = -5
     TweenService:Create(notif, TweenInfo.new(0.6, Enum.EasingStyle.Back), {
@@ -703,7 +684,6 @@ local function showNotification(title, message, duration, type)
         Rotation = 0
     }):Play()
     
-    -- Animación de salida
     task.wait(duration)
     
     TweenService:Create(notif, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
@@ -714,7 +694,6 @@ local function showNotification(title, message, duration, type)
     task.wait(0.5)
     notif:Destroy()
     
-    -- Reorganizar notificaciones
     for i, n in ipairs(currentNotifications) do
         if n == notif then
             table.remove(currentNotifications, i)
@@ -729,7 +708,7 @@ local function showNotification(title, message, duration, type)
     end
 end
 
--- Eventos de checkboxes con animación
+-- Eventos de checkboxes
 enableTrigger.checkbox.MouseButton1Click:Connect(function()
     enabled = not enabled
     enableTrigger.value = enabled
@@ -923,7 +902,7 @@ UserInputService.InputBegan:Connect(function(input)
         if guiVisible then
             main.Visible = true
             TweenService:Create(main, TweenInfo.new(0.6, Enum.EasingStyle.Back), {
-                Size = UDim2.new(0, 400, 0, 520),
+                Size = UDim2.new(0, 400, 0, 480),
                 BackgroundTransparency = 0,
             }):Play()
             showNotification("GUI", "🟢 INTERFAZ ABIERTA", 2, "success")
@@ -969,26 +948,29 @@ main.Visible = true
 
 task.wait(0.1)
 TweenService:Create(main, TweenInfo.new(0.8, Enum.EasingStyle.Back), {
-    Size = UDim2.new(0, 400, 0, 520),
+    Size = UDim2.new(0, 400, 0, 480),
     BackgroundTransparency = 0
 }):Play()
 
--- Función para detectar keypress
+-- ========== FUNCIÓN isKeyPressed CORREGIDA (más robusta) ==========
 local function isKeyPressed(input)
     if typeof(holdKey) == "EnumItem" then
-        return input.UserInputType == holdKey
-    else
-        return input.KeyCode == holdKey
+        if holdKey.EnumType == Enum.UserInputType then
+            return input.UserInputType == holdKey
+        elseif holdKey.EnumType == Enum.KeyCode then
+            return input.KeyCode == holdKey
+        end
     end
+    return false
 end
 
+-- Detectar keypress
 UserInputService.InputBegan:Connect(function(input)
     if isKeyPressed(input) then
         keyPressed = true
         if holdMode then
             triggerActive = true
             if enabled then
-                -- Efecto visual al activar
                 TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.2), {
                     BackgroundColor3 = Color3.fromRGB(0, 200, 255)
                 }):Play()
@@ -1006,13 +988,12 @@ UserInputService.InputEnded:Connect(function(input)
                 TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.2), {
                     BackgroundColor3 = Color3.fromRGB(0, 150, 255)
                 }):Play()
-
             end
         end
     end
 end)
 
--- FUNCIÓN PARA DETECTAR CUCHILLO
+-- Función para detectar cuchillo
 local function hasKnifeEquipped()
     local character = player.Character
     if not character then return false end
@@ -1020,11 +1001,7 @@ local function hasKnifeEquipped()
     local tool = character:FindFirstChildOfClass("Tool")
     if tool then
         local toolName = tool.Name:lower()
-        
-        local knifeNames = {
-            "knife", "cuchillo", "cutter", "espada", "sword", "katana", "dagger", "blade"
-        }
-        
+        local knifeNames = {"knife", "Chicken", "Pizza", "Cranberry", "Meet", "Taco",}
         for _, name in ipairs(knifeNames) do
             if toolName:find(name) then
                 return true
@@ -1037,50 +1014,37 @@ end
 local function getDistanceFromTarget(targetPart)
     local character = player.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return math.huge end
-    
     local rootPart = character.HumanoidRootPart
     return (rootPart.Position - targetPart.Position).Magnitude
 end
 
-local lastShotTime = 0
+-- ========== FUNCIÓN getTarget (simple, sin hitbox extender) ==========
+local function getTarget()
+    return mouse.Target
+end
 
--- FUNCIÓN DE DISPARO MEJORADA - SIN EFECTOS VISUALES
+-- Función de disparo
 local function shoot()
-    -- Método 1: mouse1click (el más común)
-    local success, error = pcall(function()
+    local success = pcall(function()
         mouse1click()
     end)
     
-    -- Método 2: VirtualInputManager (más potente)
     if not success then
         pcall(function()
-            VirtualInputManager:SendMouseButtonEvent(
-                mouse.X, 
-                mouse.Y, 
-                0, -- Botón izquierdo (0 = izquierdo, 1 = derecho, 2 = medio)
-                true, -- Presionar
-                game, -- Objeto
-                0 -- ID
-            )
+            VirtualInputManager:SendMouseButtonEvent(mouse.X, mouse.Y, 0, true, game, 0)
             task.wait(0.01)
-            VirtualInputManager:SendMouseButtonEvent(
-                mouse.X, 
-                mouse.Y, 
-                0, 
-                false, -- Soltar
-                game, 
-                0
-            )
+            VirtualInputManager:SendMouseButtonEvent(mouse.X, mouse.Y, 0, false, game, 0)
         end)
     end
     
-    -- Método 3: Simular clic mediante UserInputService
     pcall(function()
         UserInputService:SendMouseButtonEvent(mouse.X, mouse.Y, 0, true, game, 0)
         task.wait(0.01)
         UserInputService:SendMouseButtonEvent(mouse.X, mouse.Y, 0, false, game, 0)
     end)
 end
+
+local lastShotTime = 0
 
 RunService.Heartbeat:Connect(function()
     local shouldTrigger = enabled and triggerActive
@@ -1092,16 +1056,14 @@ RunService.Heartbeat:Connect(function()
         return
     end
     
-    local target = mouse.Target
+    local target = getTarget()
     if not target then return end
     
     local model = target.Parent
     if not model then return end
     
     local distance = getDistanceFromTarget(target)
-    if distance > maxDistance then
-        return
-    end
+    if distance > maxDistance then return end
     
     local hum = model:FindFirstChildOfClass("Humanoid")
     if not hum or hum.Health <= 0 then return end
@@ -1109,10 +1071,7 @@ RunService.Heartbeat:Connect(function()
     local plr = Players:GetPlayerFromCharacter(model)
     if not plr or plr == player then return end
     
-    -- KNIFE CHECK 
-    if knifeCheck and hasKnifeEquipped() then
-        return 
-    end
+    if knifeCheck and hasKnifeEquipped() then return end
     
     if math.random(1, 100) <= precision then
         shoot()
@@ -1120,7 +1079,6 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- Mensaje de bienvenida
+-- Mensajes de bienvenida
 showNotification("TRIGGER BOT", "🚀 Cargado exitosamente", 3, "success")
 showNotification("CONTROLES", "CTRL para abrir/cerrar", 3, "info")
-showNotification("DISPARO", "Múltiples métodos activados", 3, "info")
