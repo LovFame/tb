@@ -923,7 +923,7 @@ intervalSlider.button.MouseButton1Down:Connect(function(input)
         local percent = (UserInputService:GetMouseLocation().X - intervalSlider.button.AbsolutePosition.X) / intervalSlider.button.AbsoluteSize.X
         percent = math.clamp(percent, 0, 1)
         intervalSlider.sliderFill.Size = UDim2.new(percent, 0, 1, 0)
-        local val = 0.1 + percent * 14.9  -- rango 0.1 a 15
+        local val = 0.1 + percent * 14.9  -- range 0.1 - 15
         getgenv().hitboxRefreshInterval = val
         intervalSlider.valueLabel.Text = string.format("%.1fs", val)
     end
@@ -1098,7 +1098,7 @@ keySelectBtn.MouseButton1Click:Connect(function()
     }):Play()
     TweenService:Create(keyGlow, TweenInfo.new(0.2), {Visible = true}):Play()
     
-    keySelectBtn.Text = "🎯 PRESIONA TECLA"
+    keySelectBtn.Text = "PRESS KEY"
     
     showNotification("KEYBIND", "PRESS ANY KEY!", 5, "info")
 end)
@@ -1338,7 +1338,7 @@ local function hasKnifeEquipped()
     local tool = character:FindFirstChildOfClass("Tool")
     if tool then
         local toolName = tool.Name:lower()
-        local knifeNames = {"knife", "Chicken", "Pizza", "Cranberry", "Meet", "Taco",}
+        local knifeNames = {"knife", "chicken", "pizza", "cranberry", "meet", "taco", "fists"}
         for _, name in ipairs(knifeNames) do
             if toolName:find(name) then
                 return true
