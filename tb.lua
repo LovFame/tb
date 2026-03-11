@@ -39,7 +39,7 @@ getgenv().hitboxTeamcheck = false
 getgenv().hitboxSizeX = 4
 getgenv().hitboxSizeY = 4
 getgenv().hitboxSizeZ = 4
-getgenv().hitboxTransparency = 0.9
+getgenv().hitboxTransparency = 0.8
 getgenv().hitboxRefreshEnabled = false
 getgenv().hitboxRefreshInterval = 5
 
@@ -291,7 +291,7 @@ dots.Size = UDim2.new(1, 0, 1, 0)
 dots.BackgroundTransparency = 1
 dots.Image = "rbxassetid://3570695787"
 dots.ImageColor3 = Color3.fromRGB(0, 150, 255)
-dots.ImageTransparency = 0.89
+dots.ImageTransparency = 0.9
 dots.ScaleType = Enum.ScaleType.Tile
 dots.TileSize = UDim2.new(0, 50, 0, 50)
 dots.Parent = main
