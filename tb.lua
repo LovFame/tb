@@ -1082,14 +1082,3 @@ end)
 -- Mensajes de bienvenida
 showNotification("TRIGGERBOT", "🚀 Cargado exitosamente", 3, "success")
 showNotification("CONTROLES", "CTRL para abrir/cerrar", 3, "info")
-
-local success, err = pcall(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/thefamewebsite/LOADERS/refs/heads/main/hitboxext"))()
-end)
-
-if success then
-    showNotification("Hitbox Extender", "✅ Cargado correctamente", 3, "success")
-else
-    warn("Error al cargar Hitbox Extender:", err)
-    showNotification("Hitbox Extender", "❌ Error al cargar", 3, "error")
-end
