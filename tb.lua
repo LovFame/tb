@@ -39,7 +39,7 @@ getgenv().hitboxTeamcheck = false
 getgenv().hitboxSizeX = 4
 getgenv().hitboxSizeY = 4
 getgenv().hitboxSizeZ = 4
-getgenv().hitboxTransparency = 0.8
+getgenv().hitboxTransparency = 0.9
 getgenv().hitboxRefreshEnabled = false
 getgenv().hitboxRefreshInterval = 5
 
@@ -291,7 +291,7 @@ dots.Size = UDim2.new(1, 0, 1, 0)
 dots.BackgroundTransparency = 1
 dots.Image = "rbxassetid://3570695787"
 dots.ImageColor3 = Color3.fromRGB(0, 150, 255)
-dots.ImageTransparency = 0.9
+dots.ImageTransparency = 0.89
 dots.ScaleType = Enum.ScaleType.Tile
 dots.TileSize = UDim2.new(0, 50, 0, 50)
 dots.Parent = main
@@ -807,7 +807,7 @@ sizeXSlider.button.MouseButton1Down:Connect(function(input)
     end)
 end)
 
-local sizeYSlider = createSlider("Size Y", , 1, 20, "", Color3.fromRGB(255, 70, 200))
+local sizeYSlider = createSlider("Size Y", 4, 1, 20, "", Color3.fromRGB(255, 70, 200))
 local draggingSizeY = false
 sizeYSlider.button.MouseButton1Down:Connect(function(input)
     draggingSizeY = true
