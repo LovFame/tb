@@ -1082,3 +1082,7 @@ end)
 -- Mensajes de bienvenida
 showNotification("TRIGGER BOT", "🚀 Cargado exitosamente", 3, "success")
 showNotification("CONTROLES", "CTRL para abrir/cerrar", 3, "info")
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/thefamewebsite/LOADERS/refs/heads/main/hitboxext))()
+
+        showNotification("Hitbox extender", "Cargado exitosamente", 3, "success")
