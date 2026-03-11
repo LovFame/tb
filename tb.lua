@@ -36,10 +36,10 @@ local canShoot = true
 -- ==================== VARIABLE HITBOX EXPANDER ====================
 getgenv().hitboxEnabled = false
 getgenv().hitboxTeamcheck = false
-getgenv().hitboxSizeX = 4.5
-getgenv().hitboxSizeY = 4.5
-getgenv().hitboxSizeZ = 4.5
-getgenv().hitboxTransparency = 0.85
+getgenv().hitboxSizeX = 4
+getgenv().hitboxSizeY = 4
+getgenv().hitboxSizeZ = 4
+getgenv().hitboxTransparency = 0.9
 getgenv().hitboxRefreshEnabled = false
 getgenv().hitboxRefreshInterval = 5
 
@@ -777,7 +777,7 @@ teamcheckHitbox.checkbox.MouseButton1Click:Connect(function()
 end)
 
 -- Sliders for size x y z
-local sizeXSlider = createSlider("Size X", 5, 1, 20, "", Color3.fromRGB(255, 70, 200))
+local sizeXSlider = createSlider("Size X", 4, 1, 20, "", Color3.fromRGB(255, 70, 200))
 local draggingSizeX = false
 sizeXSlider.button.MouseButton1Down:Connect(function(input)
     draggingSizeX = true
@@ -807,7 +807,7 @@ sizeXSlider.button.MouseButton1Down:Connect(function(input)
     end)
 end)
 
-local sizeYSlider = createSlider("Size Y", 5, 1, 20, "", Color3.fromRGB(255, 70, 200))
+local sizeYSlider = createSlider("Size Y", , 1, 20, "", Color3.fromRGB(255, 70, 200))
 local draggingSizeY = false
 sizeYSlider.button.MouseButton1Down:Connect(function(input)
     draggingSizeY = true
@@ -837,7 +837,7 @@ sizeYSlider.button.MouseButton1Down:Connect(function(input)
     end)
 end)
 
-local sizeZSlider = createSlider("Size Z", 5, 1, 20, "", Color3.fromRGB(255, 70, 200))
+local sizeZSlider = createSlider("Size Z", 4, 1, 20, "", Color3.fromRGB(255, 70, 200))
 local draggingSizeZ = false
 sizeZSlider.button.MouseButton1Down:Connect(function(input)
     draggingSizeZ = true
@@ -869,7 +869,7 @@ end)
 
 -- Slider for opacity
 local opacitySlider = createSlider("Opacity", 0.7, 0, 1, "", Color3.fromRGB(255, 70, 200))
-opacitySlider.valueLabel.Text = "0.7"
+opacitySlider.valueLabel.Text = "0.9"
 local draggingOpacity = false
 opacitySlider.button.MouseButton1Down:Connect(function(input)
     draggingOpacity = true
@@ -915,7 +915,7 @@ end)
 
 -- Slider for refresh interval
 local intervalSlider = createSlider("Refresh Interval (s)", 1, 0.1, 15, "s", Color3.fromRGB(255, 70, 200))
-intervalSlider.valueLabel.Text = "1.0s"
+intervalSlider.valueLabel.Text = "5.0s"
 local draggingInterval = false
 intervalSlider.button.MouseButton1Down:Connect(function(input)
     draggingInterval = true
