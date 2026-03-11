@@ -867,8 +867,8 @@ sizeZSlider.button.MouseButton1Down:Connect(function(input)
     end)
 end)
 
--- Slider for opacity
-local opacitySlider = createSlider("Opacity", 0.7, 0, 1, "", Color3.fromRGB(255, 70, 200))
+-- Slider for ity
+local opacitySlider = createSlider("Opacity", 0.9, 0, 1, "", Color3.fromRGB(255, 70, 200))
 opacitySlider.valueLabel.Text = "0.9"
 local draggingOpacity = false
 opacitySlider.button.MouseButton1Down:Connect(function(input)
@@ -914,7 +914,7 @@ refreshCheck.checkbox.MouseButton1Click:Connect(function()
 end)
 
 -- Slider for refresh interval
-local intervalSlider = createSlider("Refresh Interval (s)", 1, 0.1, 15, "s", Color3.fromRGB(255, 70, 200))
+local intervalSlider = createSlider("Refresh Interval (s)", 5, 0.1, 15, "s", Color3.fromRGB(255, 70, 200))
 intervalSlider.valueLabel.Text = "5.0s"
 local draggingInterval = false
 intervalSlider.button.MouseButton1Down:Connect(function(input)
