@@ -1,4 +1,4 @@
--- TRIGGERBOT - DA HOOD (VERSIÓN LIMPIA, SIN HITBOX EXTENDER)
+-- TRIGGERBOT
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
 local UserInputService = game:GetService("UserInputService")
