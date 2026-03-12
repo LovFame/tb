@@ -1471,6 +1471,6 @@ UserInputService.InputBegan:Connect(function(input)
 end)
 
 -- ==================== NOTIFICACIONES FINALES ====================
-showNotification("TRIGGERBOT", "🚀 VERSIÓN MEJORADA (MOUSE.TARGET)", 3, "success")
-showNotification("CONTROLES", "CTRL para abrir/cerrar", 3, "info")
+showNotification("TRIGGERBOT", "🚀 LOADED SUCCESSFULLY!", 3, "success")
+showNotification("CONTROLES", "CTRL TO OPEN/CLOSE", 3, "info")
 showNotification("DISCORD SERVER", "https://discord.gg/ugg6MqEQTa ", 7, "info")
