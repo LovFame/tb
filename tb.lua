@@ -1,6 +1,5 @@
 -- TRIGGERBOT + HITBOX EXPANDER
 -- by FAME
--- FIX: TOGGLE
 
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
@@ -114,8 +113,8 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 -- MAIN FRAME
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 400, 0, 680)
-main.Position = UDim2.new(0.5, -200, 0.5, -340)
+main.Size = UDim2.new(0, 500, 0, 680)
+main.Position = UDim2.new(0.5, -250, 0.5, -340)
 main.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 main.BorderSizePixel = 0
 main.Active = true
@@ -264,6 +263,11 @@ scrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 scrollingFrame.ElasticBehavior = Enum.ElasticBehavior.Always
 scrollingFrame.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
 
+-- PADDING 
+local uiPadding = Instance.new("UIPadding")
+uiPadding.PaddingRight = UDim.new(0, 11)
+uiPadding.Parent = scrollingFrame
+
 local gradientBg = Instance.new("UIGradient")
 gradientBg.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(28, 28, 35)),
@@ -340,8 +344,9 @@ triggerIcon.TextSize = 24
 triggerIcon.Parent = triggerSection
 triggerIcon.ZIndex = 4
 
--- Función para crear checkboxes
-local function createCheckbox(text, default)
+
+local function createCheckbox(text, default, accentColor)
+    accentColor = accentColor or Color3.fromRGB(0, 150, 255)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 35)
     frame.BackgroundTransparency = 1
@@ -351,23 +356,24 @@ local function createCheckbox(text, default)
     local checkbox = Instance.new("TextButton")
     checkbox.Size = UDim2.new(0, 24, 0, 24)
     checkbox.Position = UDim2.new(0, 0, 0.5, -12)
-    checkbox.BackgroundColor3 = default and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(45, 45, 50)
+    checkbox.BackgroundColor3 = default and accentColor or Color3.fromRGB(45, 45, 50)
     checkbox.BorderSizePixel = 0
     checkbox.Text = ""
     checkbox.Parent = frame
     checkbox.ZIndex = 4
+    checkbox.AutoButtonColor = false
     
     local checkCorner = Instance.new("UICorner")
     checkCorner.CornerRadius = UDim.new(0, 8)
     checkCorner.Parent = checkbox
     
+ 
     local checkGlow = Instance.new("Frame")
     checkGlow.Size = UDim2.new(1, 2, 1, 2)
     checkGlow.Position = UDim2.new(0, -1, 0, -1)
     checkGlow.BackgroundTransparency = 1
     checkGlow.BorderSizePixel = 2
-    checkGlow.BorderColor3 = Color3.fromRGB(0, 150, 255)
-    checkGlow.Visible = default
+    checkGlow.BorderColor3 = default and accentColor or Color3.fromRGB(80, 80, 100)
     checkGlow.Parent = checkbox
     checkGlow.ZIndex = 5
     
@@ -391,14 +397,15 @@ local function createCheckbox(text, default)
     label.BackgroundTransparency = 1
     label.Text = text
     label.TextColor3 = Color3.fromRGB(230, 230, 250)
-    label.Font = Enum.Font.Gotham
+    label.Font = Enum.Font.GothamBlack
     label.TextSize = 15
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = frame
     label.ZIndex = 4
     
+    -- Efecto hover
     checkbox.MouseEnter:Connect(function()
-        if checkbox.BackgroundColor3 ~= Color3.fromRGB(0, 150, 255) then
+        if checkbox.BackgroundColor3 ~= accentColor then
             TweenService:Create(checkbox, TweenInfo.new(0.2), {
                 BackgroundColor3 = Color3.fromRGB(65, 65, 75),
                 Size = UDim2.new(0, 26, 0, 26)
@@ -408,7 +415,7 @@ local function createCheckbox(text, default)
     end)
     
     checkbox.MouseLeave:Connect(function()
-        if checkbox.BackgroundColor3 ~= Color3.fromRGB(0, 150, 255) then
+        if checkbox.BackgroundColor3 ~= accentColor then
             TweenService:Create(checkbox, TweenInfo.new(0.2), {
                 BackgroundColor3 = Color3.fromRGB(45, 45, 50),
                 Size = UDim2.new(0, 24, 0, 24)
@@ -417,14 +424,22 @@ local function createCheckbox(text, default)
         end
     end)
     
-    return {frame = frame, checkbox = checkbox, checkMark = checkMark, checkGlow = checkGlow, value = default}
+    return {
+        frame = frame,
+        checkbox = checkbox,
+        checkMark = checkMark,
+        checkGlow = checkGlow,
+        value = default,
+        accentColor = accentColor
+    }
 end
 
-local enableTrigger = createCheckbox("Enable Trigger Bot", false)
-local knifeCheckbox = createCheckbox("Knife Check", true)
-local forceFieldCheckbox = createCheckbox("Force Field Check", false)
 
--- Frame para keybind
+local enableTrigger = createCheckbox("Enable Trigger Bot", false, Color3.fromRGB(0, 150, 255))
+local knifeCheckbox = createCheckbox("Knife Check", true, Color3.fromRGB(0, 150, 255))
+local forceFieldCheckbox = createCheckbox("Force Field Check", false, Color3.fromRGB(0, 150, 255))
+
+
 local keyFrame = Instance.new("Frame")
 keyFrame.Size = UDim2.new(1, 0, 0, 85)
 keyFrame.BackgroundTransparency = 1
@@ -448,10 +463,11 @@ modeBtn.Position = UDim2.new(0, 0, 0, 35)
 modeBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
 modeBtn.Text = "HOLD"
 modeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-modeBtn.Font = Enum.Font.GothamBold
+modeBtn.Font = Enum.Font.GothamBlack
 modeBtn.TextSize = 16
 modeBtn.Parent = keyFrame
 modeBtn.ZIndex = 4
+modeBtn.AutoButtonColor = false
 
 local modeCorner = Instance.new("UICorner")
 modeCorner.CornerRadius = UDim.new(0, 10)
@@ -490,10 +506,11 @@ keySelectBtn.Position = UDim2.new(0.52, 0, 0, 35)
 keySelectBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
 keySelectBtn.Text = "RIGHT CLICK (DEFAULT)"
 keySelectBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-keySelectBtn.Font = Enum.Font.Gotham
+keySelectBtn.Font = Enum.Font.GothamBlack
 keySelectBtn.TextSize = 14
 keySelectBtn.Parent = keyFrame
 keySelectBtn.ZIndex = 4
+keySelectBtn.AutoButtonColor = false
 
 local keyCorner = Instance.new("UICorner")
 keyCorner.CornerRadius = UDim.new(0, 10)
@@ -531,7 +548,7 @@ keySelectBtn.MouseLeave:Connect(function()
     end
 end)
 
--- Sección Configuration
+
 local configSection = Instance.new("Frame")
 configSection.Size = UDim2.new(1, 0, 0, 45)
 configSection.BackgroundTransparency = 1
@@ -578,7 +595,7 @@ configIcon.TextSize = 24
 configIcon.Parent = configSection
 configIcon.ZIndex = 4
 
--- Función para crear sliders
+
 local function createSlider(text, value, min, max, suffix, color)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 60)
@@ -591,7 +608,7 @@ local function createSlider(text, value, min, max, suffix, color)
     label.BackgroundTransparency = 1
     label.Text = text
     label.TextColor3 = Color3.fromRGB(230, 230, 250)
-    label.Font = Enum.Font.Gotham
+    label.Font = Enum.Font.GothamBlack
     label.TextSize = 15
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = frame
@@ -725,43 +742,14 @@ hitboxIcon.TextSize = 24
 hitboxIcon.Parent = hitboxSection
 hitboxIcon.ZIndex = 4
 
--- Checkbox: Habilitar hitbox
-local enableHitbox = createCheckbox("Enable Hitbox Expander", false)
-enableHitbox.checkbox.MouseButton1Click:Connect(function()
-    getgenv().hitboxEnabled = not getgenv().hitboxEnabled
-    enableHitbox.value = getgenv().hitboxEnabled
-    
-    local targetColor = getgenv().hitboxEnabled and Color3.fromRGB(255, 70, 200) or Color3.fromRGB(45, 45, 50)
-    TweenService:Create(enableHitbox.checkbox, TweenInfo.new(0.3), {BackgroundColor3 = targetColor}):Play()
-    TweenService:Create(enableHitbox.checkGlow, TweenInfo.new(0.3), {Visible = getgenv().hitboxEnabled}):Play()
-    enableHitbox.checkMark.Text = getgenv().hitboxEnabled and "✓" or ""
-    
-    if getgenv().hitboxEnabled then
-        applyHitboxToAll()
-        showNotification("Hitbox", "🟢 ENABLED", 2, "success")
-    else
-        restoreAllOriginal()
-        showNotification("Hitbox", "🔴 DISABLED", 2, "error")
-    end
-end)
+-- Checkbox: Habilitar hitbox (usamos color rosa)
+local enableHitbox = createCheckbox("Enable Hitbox Expander", false, Color3.fromRGB(255, 70, 200))
 
 -- Checkbox: Team check
-local teamcheckHitbox = createCheckbox("Team Check (only enemies)", false)
-teamcheckHitbox.checkbox.MouseButton1Click:Connect(function()
-    getgenv().hitboxTeamcheck = not getgenv().hitboxTeamcheck
-    teamcheckHitbox.value = getgenv().hitboxTeamcheck
-    
-    local targetColor = getgenv().hitboxTeamcheck and Color3.fromRGB(255, 70, 200) or Color3.fromRGB(45, 45, 50)
-    TweenService:Create(teamcheckHitbox.checkbox, TweenInfo.new(0.3), {BackgroundColor3 = targetColor}):Play()
-    TweenService:Create(teamcheckHitbox.checkGlow, TweenInfo.new(0.3), {Visible = getgenv().hitboxTeamcheck}):Play()
-    teamcheckHitbox.checkMark.Text = getgenv().hitboxTeamcheck and "✓" or ""
-    
-    if getgenv().hitboxEnabled then
-        -- teamcheck effect replic
-        restoreAllOriginal()
-        applyHitboxToAll()
-    end
-end)
+local teamcheckHitbox = createCheckbox("Team Check (only enemies)", false, Color3.fromRGB(255, 70, 200))
+
+-- Checkbox: Refresco automático
+local refreshCheck = createCheckbox("Auto Refresh (fix respawn)", false, Color3.fromRGB(255, 70, 200))
 
 -- Sliders for size x y z
 local sizeXSlider = createSlider("Size X", 4, 1, 20, "", Color3.fromRGB(255, 70, 200))
@@ -854,7 +842,7 @@ sizeZSlider.button.MouseButton1Down:Connect(function(input)
     end)
 end)
 
--- Slider for ity
+-- Slider for opacity
 local opacitySlider = createSlider("Opacity", 0.9, 0, 1, "", Color3.fromRGB(255, 70, 200))
 opacitySlider.valueLabel.Text = "0.9"
 local draggingOpacity = false
@@ -886,20 +874,6 @@ opacitySlider.button.MouseButton1Down:Connect(function(input)
     end)
 end)
 
--- Checkbox: Refresco automático
-local refreshCheck = createCheckbox("Auto Refresh (fix respawn)", false)
-refreshCheck.checkbox.MouseButton1Click:Connect(function()
-    getgenv().hitboxRefreshEnabled = not getgenv().hitboxRefreshEnabled
-    refreshCheck.value = getgenv().hitboxRefreshEnabled
-    
-    local targetColor = getgenv().hitboxRefreshEnabled and Color3.fromRGB(255, 70, 200) or Color3.fromRGB(45, 45, 50)
-    TweenService:Create(refreshCheck.checkbox, TweenInfo.new(0.3), {BackgroundColor3 = targetColor}):Play()
-    TweenService:Create(refreshCheck.checkGlow, TweenInfo.new(0.3), {Visible = getgenv().hitboxRefreshEnabled}):Play()
-    refreshCheck.checkMark.Text = getgenv().hitboxRefreshEnabled and "✓" or ""
-    
-    showNotification("Auto Refresh", getgenv().hitboxRefreshEnabled and "✅ Enabled" or "❌ Disabled", 2, "info")
-end)
-
 -- Slider for refresh interval
 local intervalSlider = createSlider("Refresh Interval (s)", 5, 0.1, 15, "s", Color3.fromRGB(255, 70, 200))
 intervalSlider.valueLabel.Text = "5.0s"
@@ -929,9 +903,7 @@ intervalSlider.button.MouseButton1Down:Connect(function(input)
     end)
 end)
 
--- ==================== hitboxencd ====================
-
--- FUNTION NOTIFY MAKER
+-- ==================== NOTIFICACIONES ====================
 local function showNotification(title, message, duration, type)
     duration = duration or notificationDuration
     
@@ -992,7 +964,7 @@ local function showNotification(title, message, duration, type)
     notifMessage.BackgroundTransparency = 1
     notifMessage.Text = message
     notifMessage.TextColor3 = Color3.fromRGB(255, 255, 255)
-    notifMessage.Font = Enum.Font.Gotham
+    notifMessage.Font = Enum.Font.GothamBlack
     notifMessage.TextSize = 13
     notifMessage.TextXAlignment = Enum.TextXAlignment.Left
     notifMessage.TextWrapped = true
@@ -1032,37 +1004,112 @@ local function showNotification(title, message, duration, type)
     end
 end
 
--- Events checkbox tb
+-- Eventos de los checkboxes (Trigger Bot) - CON RESPUESTA INSTANTÁNEA
+enableTrigger.checkbox.MouseButton1Down:Connect(function()
+    local newState = not enableTrigger.value
+    enableTrigger.checkbox.BackgroundColor3 = newState and enableTrigger.accentColor or Color3.fromRGB(45, 45, 50)
+    enableTrigger.checkGlow.BorderColor3 = newState and enableTrigger.accentColor or Color3.fromRGB(80, 80, 100)
+    enableTrigger.checkMark.Text = newState and "✓" or ""
+end)
+
 enableTrigger.checkbox.MouseButton1Click:Connect(function()
     enabled = not enabled
     enableTrigger.value = enabled
-    
-    local targetColor = enabled and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(45, 45, 50)
-    TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.3), {BackgroundColor3 = targetColor}):Play()
-    TweenService:Create(enableTrigger.checkGlow, TweenInfo.new(0.3), {Visible = enabled}):Play()
+    -- Aseguramos que los colores coincidan (por si el clic fue muy rápido y no se ejecutó el Down)
+    enableTrigger.checkbox.BackgroundColor3 = enabled and enableTrigger.accentColor or Color3.fromRGB(45, 45, 50)
+    enableTrigger.checkGlow.BorderColor3 = enabled and enableTrigger.accentColor or Color3.fromRGB(80, 80, 100)
     enableTrigger.checkMark.Text = enabled and "✓" or ""
-    
-    -- NOTIFICACIÓN ELIMINADA (Trigger Bot enable/disable)
+end)
+
+knifeCheckbox.checkbox.MouseButton1Down:Connect(function()
+    local newState = not knifeCheckbox.value
+    knifeCheckbox.checkbox.BackgroundColor3 = newState and knifeCheckbox.accentColor or Color3.fromRGB(45, 45, 50)
+    knifeCheckbox.checkGlow.BorderColor3 = newState and knifeCheckbox.accentColor or Color3.fromRGB(80, 80, 100)
+    knifeCheckbox.checkMark.Text = newState and "✓" or ""
 end)
 
 knifeCheckbox.checkbox.MouseButton1Click:Connect(function()
     knifeCheck = not knifeCheck
     knifeCheckbox.value = knifeCheck
-    
-    local targetColor = knifeCheck and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(45, 45, 50)
-    TweenService:Create(knifeCheckbox.checkbox, TweenInfo.new(0.3), {BackgroundColor3 = targetColor}):Play()
-    TweenService:Create(knifeCheckbox.checkGlow, TweenInfo.new(0.3), {Visible = knifeCheck}):Play()
+    knifeCheckbox.checkbox.BackgroundColor3 = knifeCheck and knifeCheckbox.accentColor or Color3.fromRGB(45, 45, 50)
+    knifeCheckbox.checkGlow.BorderColor3 = knifeCheck and knifeCheckbox.accentColor or Color3.fromRGB(80, 80, 100)
     knifeCheckbox.checkMark.Text = knifeCheck and "✓" or ""
+end)
+
+forceFieldCheckbox.checkbox.MouseButton1Down:Connect(function()
+    local newState = not forceFieldCheckbox.value
+    forceFieldCheckbox.checkbox.BackgroundColor3 = newState and forceFieldCheckbox.accentColor or Color3.fromRGB(45, 45, 50)
+    forceFieldCheckbox.checkGlow.BorderColor3 = newState and forceFieldCheckbox.accentColor or Color3.fromRGB(80, 80, 100)
+    forceFieldCheckbox.checkMark.Text = newState and "✓" or ""
 end)
 
 forceFieldCheckbox.checkbox.MouseButton1Click:Connect(function()
     forceFieldCheck = not forceFieldCheck
     forceFieldCheckbox.value = forceFieldCheck
-    
-    local targetColor = forceFieldCheck and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(45, 45, 50)
-    TweenService:Create(forceFieldCheckbox.checkbox, TweenInfo.new(0.3), {BackgroundColor3 = targetColor}):Play()
-    TweenService:Create(forceFieldCheckbox.checkGlow, TweenInfo.new(0.3), {Visible = forceFieldCheck}):Play()
+    forceFieldCheckbox.checkbox.BackgroundColor3 = forceFieldCheck and forceFieldCheckbox.accentColor or Color3.fromRGB(45, 45, 50)
+    forceFieldCheckbox.checkGlow.BorderColor3 = forceFieldCheck and forceFieldCheckbox.accentColor or Color3.fromRGB(80, 80, 100)
     forceFieldCheckbox.checkMark.Text = forceFieldCheck and "✓" or ""
+end)
+
+-- Eventos para hitbox checkboxes
+enableHitbox.checkbox.MouseButton1Down:Connect(function()
+    local newState = not enableHitbox.value
+    enableHitbox.checkbox.BackgroundColor3 = newState and enableHitbox.accentColor or Color3.fromRGB(45, 45, 50)
+    enableHitbox.checkGlow.BorderColor3 = newState and enableHitbox.accentColor or Color3.fromRGB(80, 80, 100)
+    enableHitbox.checkMark.Text = newState and "✓" or ""
+end)
+
+enableHitbox.checkbox.MouseButton1Click:Connect(function()
+    getgenv().hitboxEnabled = not getgenv().hitboxEnabled
+    enableHitbox.value = getgenv().hitboxEnabled
+    enableHitbox.checkbox.BackgroundColor3 = getgenv().hitboxEnabled and enableHitbox.accentColor or Color3.fromRGB(45, 45, 50)
+    enableHitbox.checkGlow.BorderColor3 = getgenv().hitboxEnabled and enableHitbox.accentColor or Color3.fromRGB(80, 80, 100)
+    enableHitbox.checkMark.Text = getgenv().hitboxEnabled and "✓" or ""
+    
+    if getgenv().hitboxEnabled then
+        applyHitboxToAll()
+        showNotification("Hitbox", "🟢 ENABLED", 2, "success")
+    else
+        restoreAllOriginal()
+        showNotification("Hitbox", "🔴 DISABLED", 2, "error")
+    end
+end)
+
+teamcheckHitbox.checkbox.MouseButton1Down:Connect(function()
+    local newState = not teamcheckHitbox.value
+    teamcheckHitbox.checkbox.BackgroundColor3 = newState and teamcheckHitbox.accentColor or Color3.fromRGB(45, 45, 50)
+    teamcheckHitbox.checkGlow.BorderColor3 = newState and teamcheckHitbox.accentColor or Color3.fromRGB(80, 80, 100)
+    teamcheckHitbox.checkMark.Text = newState and "✓" or ""
+end)
+
+teamcheckHitbox.checkbox.MouseButton1Click:Connect(function()
+    getgenv().hitboxTeamcheck = not getgenv().hitboxTeamcheck
+    teamcheckHitbox.value = getgenv().hitboxTeamcheck
+    teamcheckHitbox.checkbox.BackgroundColor3 = getgenv().hitboxTeamcheck and teamcheckHitbox.accentColor or Color3.fromRGB(45, 45, 50)
+    teamcheckHitbox.checkGlow.BorderColor3 = getgenv().hitboxTeamcheck and teamcheckHitbox.accentColor or Color3.fromRGB(80, 80, 100)
+    teamcheckHitbox.checkMark.Text = getgenv().hitboxTeamcheck and "✓" or ""
+    
+    if getgenv().hitboxEnabled then
+        restoreAllOriginal()
+        applyHitboxToAll()
+    end
+end)
+
+refreshCheck.checkbox.MouseButton1Down:Connect(function()
+    local newState = not refreshCheck.value
+    refreshCheck.checkbox.BackgroundColor3 = newState and refreshCheck.accentColor or Color3.fromRGB(45, 45, 50)
+    refreshCheck.checkGlow.BorderColor3 = newState and refreshCheck.accentColor or Color3.fromRGB(80, 80, 100)
+    refreshCheck.checkMark.Text = newState and "✓" or ""
+end)
+
+refreshCheck.checkbox.MouseButton1Click:Connect(function()
+    getgenv().hitboxRefreshEnabled = not getgenv().hitboxRefreshEnabled
+    refreshCheck.value = getgenv().hitboxRefreshEnabled
+    refreshCheck.checkbox.BackgroundColor3 = getgenv().hitboxRefreshEnabled and refreshCheck.accentColor or Color3.fromRGB(45, 45, 50)
+    refreshCheck.checkGlow.BorderColor3 = getgenv().hitboxRefreshEnabled and refreshCheck.accentColor or Color3.fromRGB(80, 80, 100)
+    refreshCheck.checkMark.Text = getgenv().hitboxRefreshEnabled and "✓" or ""
+    
+    showNotification("Auto Refresh", getgenv().hitboxRefreshEnabled and "✅ Enabled" or "❌ Disabled", 2, "info")
 end)
 
 modeBtn.MouseButton1Click:Connect(function()
@@ -1072,8 +1119,6 @@ modeBtn.MouseButton1Click:Connect(function()
     TweenService:Create(modeBtn, TweenInfo.new(0.3), {
         BackgroundColor3 = holdMode and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(255, 150, 0)
     }):Play()
-    
-    -- NOTIFICACIÓN ELIMINADA (cambio de modo)
 end)
 
 keySelectBtn.MouseButton1Click:Connect(function()
@@ -1086,8 +1131,6 @@ keySelectBtn.MouseButton1Click:Connect(function()
     TweenService:Create(keyGlow, TweenInfo.new(0.2), {Visible = true}):Play()
     
     keySelectBtn.Text = "PRESS KEY"
-    
-    -- NOTIFICACIÓN ELIMINADA (press any key)
 end)
 
 UserInputService.InputBegan:Connect(function(input)
@@ -1113,7 +1156,6 @@ UserInputService.InputBegan:Connect(function(input)
         TweenService:Create(keyGlow, TweenInfo.new(0.2), {Visible = false}):Play()
         
         isSelectingKey = false
-        -- NOTIFICACIÓN ELIMINADA (keybind set)
     end
 end)
 
@@ -1201,20 +1243,17 @@ UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         if draggingPrecision then
             draggingPrecision = false
-            -- NOTIFICACIÓN ELIMINADA (precision)
         end
         if draggingDelay then
             draggingDelay = false
-            -- NOTIFICACIÓN ELIMINADA (delay)
         end
         if draggingDistance then
             draggingDistance = false
-            -- NOTIFICACIÓN ELIMINADA (range)
         end
     end
 end)
 
--- Visiblidity control w right control
+-- Visibilidad con Ctrl derecho
 local function isCtrlKey(input)
     return input.KeyCode == Enum.KeyCode.RightControl
 end
@@ -1226,7 +1265,7 @@ UserInputService.InputBegan:Connect(function(input)
         if guiVisible then
             main.Visible = true
             TweenService:Create(main, TweenInfo.new(0.6, Enum.EasingStyle.Back), {
-                Size = UDim2.new(0, 400, 0, 680),
+                Size = UDim2.new(0, 500, 0, 680),
                 BackgroundTransparency = 0,
             }):Play()
             showNotification("GUI", "🟢 OPEN INTERFACE", 2, "success")
@@ -1265,18 +1304,18 @@ closeBtn.MouseButton1Click:Connect(function()
     enabled = false
 end)
 
--- Animation
+-- Animación de entrada
 main.Size = UDim2.new(0, 0, 0, 0)
 main.BackgroundTransparency = 1
 main.Visible = true
 
 task.wait(0.1)
 TweenService:Create(main, TweenInfo.new(0.8, Enum.EasingStyle.Back), {
-    Size = UDim2.new(0, 400, 0, 680),
+    Size = UDim2.new(0, 500, 0, 680),
     BackgroundTransparency = 0
 }):Play()
 
--- IS KEYPRESSED
+-- Funciones auxiliares para el triggerbot
 local function isKeyPressed(input)
     if typeof(holdKey) == "EnumItem" then
         if holdKey.EnumType == Enum.UserInputType then
@@ -1288,23 +1327,19 @@ local function isKeyPressed(input)
     return false
 end
 
--- DETECT KEYPRESS (corregido: ahora soporta TOGGLE)
 UserInputService.InputBegan:Connect(function(input)
     if isKeyPressed(input) then
         keyPressed = true
         if enabled then
             if holdMode then
-                -- MODO HOLD: activar mientras se presiona
                 triggerActive = true
                 TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.2), {
                     BackgroundColor3 = Color3.fromRGB(0, 200, 255)
                 }):Play()
             else
-                -- MODO TOGGLE: invertir estado
                 triggerActive = not triggerActive
-                -- Feedback visual
                 TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.2), {
-                    BackgroundColor3 = triggerActive and Color3.fromRGB(0, 200, 255) or Color3.fromRGB(0, 150, 255)
+                    BackgroundColor3 = triggerActive and Color3.fromRGB(0, 200, 255) or enableTrigger.accentColor
                 }):Play()
             end
         end
@@ -1315,15 +1350,13 @@ UserInputService.InputEnded:Connect(function(input)
     if isKeyPressed(input) then
         keyPressed = false
         if enabled and holdMode then
-            -- Solo en modo HOLD se desactiva al soltar
             triggerActive = false
             TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.2), {
-                BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+                BackgroundColor3 = enableTrigger.accentColor
             }):Play()
         end
     end
 end)
-
 
 local function hasKnifeEquipped()
     local character = player.Character
@@ -1348,9 +1381,7 @@ local function getDistanceFromTarget(targetPart)
     return (rootPart.Position - targetPart.Position).Magnitude
 end
 
--- Función para obtener el objetivo usando mouse.Target (similar al triggerbot que funciona)
 local function getTarget()
-    -- Si no hay target, retorna nil
     if not mouse.Target then return nil end
 
     local target = mouse.Target
@@ -1363,20 +1394,16 @@ local function getTarget()
     local hum = model:FindFirstChildOfClass("Humanoid")
     if not hum or hum.Health <= 0 then return nil end
 
-    -- Verificar distancia
     local distance = getDistanceFromTarget(target)
     if distance > maxDistance then return nil end
 
     return target
 end
 
--- Función de disparo mejorada (intenta múltiples métodos)
 local function shoot()
-    -- Método 1: mouse1click
     local success = pcall(mouse1click)
     if success then return end
 
-    -- Método 2: VirtualInputManager
     success = pcall(function()
         VirtualInputManager:SendMouseButtonEvent(mouse.X, mouse.Y, 0, true, game, 0)
         task.wait(0.01)
@@ -1384,7 +1411,6 @@ local function shoot()
     end)
     if success then return end
 
-    -- Método 3: UserInputService
     success = pcall(function()
         UserInputService:SendMouseButtonEvent(mouse.X, mouse.Y, 0, true, game, 0)
         task.wait(0.01)
@@ -1392,7 +1418,6 @@ local function shoot()
     end)
     if success then return end
 
-    -- Método 4: Activar tool actual
     local character = player.Character
     if character then
         local tool = character:FindFirstChildOfClass("Tool")
@@ -1409,7 +1434,6 @@ local function shoot()
         end
     end
 
-    -- Método 5: Simular tecla (por defecto "E")
     pcall(function()
         VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
         task.wait(0.01)
@@ -1417,15 +1441,13 @@ local function shoot()
     end)
 end
 
--- ==================== LOOP PRINCIPAL (basado en mouse.Target) ====================
+-- mainloop
 local lastShotTime = 0
 local mousePressed = false
 
 RunService.Heartbeat:Connect(function()
-    -- Solo si está activado y la tecla está presionada (o toggled)
     local shouldTrigger = enabled and triggerActive
     if not shouldTrigger then
-        -- Si no debe disparar, asegurarse de soltar el mouse si estaba presionado
         if mousePressed then
             mouse1release()
             mousePressed = false
@@ -1433,18 +1455,14 @@ RunService.Heartbeat:Connect(function()
         return
     end
 
-    -- Control de cadencia
     local currentTime = tick()
     if currentTime - lastShotTime < (triggerDelay / 1000) then
         return
     end
 
-    -- Obtener objetivo mediante mouse.Target
     local target = getTarget()
     if target then
-        -- Verificar knife check
         if knifeCheck and hasKnifeEquipped() then
-            -- Si tiene cuchillo, no dispara
             if mousePressed then
                 mouse1release()
                 mousePressed = false
@@ -1452,15 +1470,12 @@ RunService.Heartbeat:Connect(function()
             return
         end
 
-        -- Aplicar precisión
         if math.random(1, 100) <= precision then
-            -- Disparar
             shoot()
             lastShotTime = currentTime
             mousePressed = true
         end
     else
-        -- Si no hay objetivo, soltar el mouse si estaba presionado
         if mousePressed then
             mouse1release()
             mousePressed = false
@@ -1468,7 +1483,6 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- Asegurar soltar el mouse al desactivar
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.RightControl then
         if mousePressed then
@@ -1478,7 +1492,7 @@ UserInputService.InputBegan:Connect(function(input)
     end
 end)
 
--- ==================== NOTIFICACIONES FINALES ====================
+-- last notif
 showNotification("TRIGGERBOT", "🚀 LOADED SUCCESSFULLY!", 3, "success")
 showNotification("CONTROLES", "CTRL TO OPEN/CLOSE", 3, "info")
 showNotification("DISCORD SERVER", "https://discord.gg/ugg6MqEQTa ", 7, "info")
