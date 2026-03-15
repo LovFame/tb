@@ -1,5 +1,6 @@
 -- TRIGGERBOT + HITBOX EXPANDER (INTEGRADO)
 -- by FAME (MODIFICADO: DETECCIÓN POR MOUSE.TARGET MEJORADA)
+-- FIX: MODO TOGGLE FUNCIONA + SIN NOTIS DEL TRIGGER
 
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
@@ -1041,7 +1042,7 @@ enableTrigger.checkbox.MouseButton1Click:Connect(function()
     TweenService:Create(enableTrigger.checkGlow, TweenInfo.new(0.3), {Visible = enabled}):Play()
     enableTrigger.checkMark.Text = enabled and "✓" or ""
     
-    showNotification("Trigger Bot", enabled and "✅ ENABLED" or "❌ DISABLED", 2, enabled and "success" or "error")
+    -- NOTIFICACIÓN ELIMINADA (Trigger Bot enable/disable)
 end)
 
 knifeCheckbox.checkbox.MouseButton1Click:Connect(function()
@@ -1072,7 +1073,7 @@ modeBtn.MouseButton1Click:Connect(function()
         BackgroundColor3 = holdMode and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(255, 150, 0)
     }):Play()
     
-    showNotification("MODE", holdMode and "🔒 HOLD MODE" or "🔄 TOGGLE MODE", 2, "info")
+    -- NOTIFICACIÓN ELIMINADA (cambio de modo)
 end)
 
 keySelectBtn.MouseButton1Click:Connect(function()
@@ -1086,7 +1087,7 @@ keySelectBtn.MouseButton1Click:Connect(function()
     
     keySelectBtn.Text = "PRESS KEY"
     
-    showNotification("KEYBIND", "PRESS ANY KEY!", 5, "info")
+    -- NOTIFICACIÓN ELIMINADA (press any key)
 end)
 
 UserInputService.InputBegan:Connect(function(input)
@@ -1112,7 +1113,7 @@ UserInputService.InputBegan:Connect(function(input)
         TweenService:Create(keyGlow, TweenInfo.new(0.2), {Visible = false}):Play()
         
         isSelectingKey = false
-        showNotification("KEYBIND", "✓ " .. keySelectBtn.Text, 2, "success")
+        -- NOTIFICACIÓN ELIMINADA (keybind set)
     end
 end)
 
@@ -1200,15 +1201,15 @@ UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         if draggingPrecision then
             draggingPrecision = false
-            showNotification("PRECISION", precision .. "%", 1.5, "info")
+            -- NOTIFICACIÓN ELIMINADA (precision)
         end
         if draggingDelay then
             draggingDelay = false
-            showNotification("DELAY", triggerDelay .. "ms", 1.5, "info")
+            -- NOTIFICACIÓN ELIMINADA (delay)
         end
         if draggingDistance then
             draggingDistance = false
-            showNotification("RANGE", maxDistance .. " studs", 1.5, "info")
+            -- NOTIFICACIÓN ELIMINADA (range)
         end
     end
 end)
@@ -1287,15 +1288,23 @@ local function isKeyPressed(input)
     return false
 end
 
--- DETECT KEYPRESS
+-- DETECT KEYPRESS (corregido: ahora soporta TOGGLE)
 UserInputService.InputBegan:Connect(function(input)
     if isKeyPressed(input) then
         keyPressed = true
-        if holdMode then
-            triggerActive = true
-            if enabled then
+        if enabled then
+            if holdMode then
+                -- MODO HOLD: activar mientras se presiona
+                triggerActive = true
                 TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.2), {
                     BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+                }):Play()
+            else
+                -- MODO TOGGLE: invertir estado
+                triggerActive = not triggerActive
+                -- Feedback visual
+                TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.2), {
+                    BackgroundColor3 = triggerActive and Color3.fromRGB(0, 200, 255) or Color3.fromRGB(0, 150, 255)
                 }):Play()
             end
         end
@@ -1305,13 +1314,12 @@ end)
 UserInputService.InputEnded:Connect(function(input)
     if isKeyPressed(input) then
         keyPressed = false
-        if holdMode then
+        if enabled and holdMode then
+            -- Solo en modo HOLD se desactiva al soltar
             triggerActive = false
-            if enabled then
-                TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.2), {
-                    BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-                }):Play()
-            end
+            TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+            }):Play()
         end
     end
 end)
@@ -1414,7 +1422,7 @@ local lastShotTime = 0
 local mousePressed = false
 
 RunService.Heartbeat:Connect(function()
-    -- Solo si está activado y la tecla está presionada
+    -- Solo si está activado y la tecla está presionada (o toggled)
     local shouldTrigger = enabled and triggerActive
     if not shouldTrigger then
         -- Si no debe disparar, asegurarse de soltar el mouse si estaba presionado
