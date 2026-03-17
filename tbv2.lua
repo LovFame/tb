@@ -385,6 +385,10 @@ contentScroller.AutomaticCanvasSize = Enum.AutomaticSize.Y
 contentScroller.ElasticBehavior = Enum.ElasticBehavior.Always
 contentScroller.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
 
+local uiPadding = Instance.new("UIPadding")
+uiPadding.PaddingRight = UDim.new(0, 11)
+uiPadding.Parent = scrollingFrame
+
 local layout = Instance.new("UIListLayout")
 layout.Padding = UDim.new(0, 15)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
