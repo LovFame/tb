@@ -1,12 +1,16 @@
 -- TRIGGERBOT + HITBOX EXPANDER
 -- by FAME
--- MODIFICADO: checkboxes con respuesta instantánea al clic
 
-local player = game.Players.LocalPlayer
-local mouse = player:GetMouse()
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
+local Players
+local player
+local success, Players = pcall(game.GetService, game, "Players")
+local player = Players.LocalPlayer
+if not player then
+    player = Players.PlayerAdded:Wait()
+end
+local mouse = player:GetMouse()
 local TweenService = game:GetService("TweenService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local camera = workspace.CurrentCamera
@@ -112,7 +116,7 @@ gui.IgnoreGuiInset = true
 gui.Enabled = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- MAIN FRAME (ANCHO 500)
+-- MAIN FRAME
 local main = Instance.new("Frame")
 main.Size = UDim2.new(0, 500, 0, 680)
 main.Position = UDim2.new(0.5, -250, 0.5, -340)
@@ -264,7 +268,7 @@ scrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 scrollingFrame.ElasticBehavior = Enum.ElasticBehavior.Always
 scrollingFrame.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
 
--- PADDING DERECHO PARA QUE LA SCROLLBAR NO TAPE EL CONTENIDO
+-- PADDING 
 local uiPadding = Instance.new("UIPadding")
 uiPadding.PaddingRight = UDim.new(0, 11)
 uiPadding.Parent = scrollingFrame
@@ -362,13 +366,13 @@ local function createCheckbox(text, default, accentColor)
     checkbox.Text = ""
     checkbox.Parent = frame
     checkbox.ZIndex = 4
-    checkbox.AutoButtonColor = false -- Evita el efecto gris por defecto
+    checkbox.AutoButtonColor = false
     
     local checkCorner = Instance.new("UICorner")
     checkCorner.CornerRadius = UDim.new(0, 8)
     checkCorner.Parent = checkbox
     
-    -- Borde (glow) siempre visible
+ 
     local checkGlow = Instance.new("Frame")
     checkGlow.Size = UDim2.new(1, 2, 1, 2)
     checkGlow.Position = UDim2.new(0, -1, 0, -1)
@@ -435,12 +439,12 @@ local function createCheckbox(text, default, accentColor)
     }
 end
 
--- Crear checkboxes con sus colores específicos
+
 local enableTrigger = createCheckbox("Enable Trigger Bot", false, Color3.fromRGB(0, 150, 255))
 local knifeCheckbox = createCheckbox("Knife Check", true, Color3.fromRGB(0, 150, 255))
 local forceFieldCheckbox = createCheckbox("Force Field Check", false, Color3.fromRGB(0, 150, 255))
 
--- Frame para keybind
+
 local keyFrame = Instance.new("Frame")
 keyFrame.Size = UDim2.new(1, 0, 0, 85)
 keyFrame.BackgroundTransparency = 1
@@ -549,7 +553,7 @@ keySelectBtn.MouseLeave:Connect(function()
     end
 end)
 
--- Sección Configuration
+
 local configSection = Instance.new("Frame")
 configSection.Size = UDim2.new(1, 0, 0, 45)
 configSection.BackgroundTransparency = 1
@@ -596,7 +600,7 @@ configIcon.TextSize = 24
 configIcon.Parent = configSection
 configIcon.ZIndex = 4
 
--- Función para crear sliders
+
 local function createSlider(text, value, min, max, suffix, color)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 60)
@@ -1442,7 +1446,7 @@ local function shoot()
     end)
 end
 
--- Loop principal
+-- mainloop
 local lastShotTime = 0
 local mousePressed = false
 
@@ -1493,7 +1497,7 @@ UserInputService.InputBegan:Connect(function(input)
     end
 end)
 
--- Notificaciones finales
+-- last notif
 showNotification("TRIGGERBOT", "🚀 LOADED SUCCESSFULLY!", 3, "success")
 showNotification("CONTROLES", "CTRL TO OPEN/CLOSE", 3, "info")
 showNotification("DISCORD SERVER", "https://discord.gg/ugg6MqEQTa ", 7, "info")
