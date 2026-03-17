@@ -1,11 +1,16 @@
 -- TRIGGERBOT + HITBOX EXPANDER
 -- by FAME
 
-local player = game.Players.LocalPlayer
-local mouse = player:GetMouse()
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
+local Players
+local player
+local success, Players = pcall(game.GetService, game, "Players")
+local player = Players.LocalPlayer
+if not player then
+    player = Players.PlayerAdded:Wait()
+end
+local mouse = player:GetMouse()
 local TweenService = game:GetService("TweenService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local camera = workspace.CurrentCamera
