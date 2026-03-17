@@ -362,8 +362,8 @@ sidebarGradient.Parent = sidebar
 -- IDs de imagen (puedes cambiarlos)
 local iconAssets = {
     trigger = "rbxassetid://6031075938",  -- rayo
-    hitbox = "rbxassetid://6031091654",   -- caja
-    config = "rbxassetid://6031119568",   -- engranaje
+    hitbox = "rbxassetid://75691853201877",   -- caja
+    config = "rbxassetid://13300915301",   -- engranaje
 }
 
 local function createSidebarButtonWithImage(assetId, text, posY)
