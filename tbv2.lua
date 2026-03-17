@@ -1,3 +1,208 @@
+-- TRIGGERBOT + HITBOX EXPANDER (CORREGIDO) -- by FAME
+-- INTERFAZ MODERNA Y PROFESIONAL
+
+local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local camera = workspace.CurrentCamera
+
+-- ==================== VARIABLES TRIGGERBOT ====================
+local enabled = false
+local knifeCheck = true
+local forceFieldCheck = false
+local holdMode = true
+local precision = 50
+local triggerDelay = 1          -- en ms
+local maxDistance = 500
+
+local holdKey = Enum.UserInputType.MouseButton2
+local keyPressed = false
+local triggerActive = false
+local isSelectingKey = false
+local guiVisible = true
+
+local notificationDuration = 2
+local currentNotifications = {}
+
+-- ==================== VARIABLES HITBOX EXPANDER ====================
+getgenv().hitboxEnabled = false
+getgenv().hitboxTeamcheck = false
+getgenv().hitboxSizeX = 4
+getgenv().hitboxSizeY = 4
+getgenv().hitboxSizeZ = 4
+getgenv().hitboxTransparency = 0.9
+getgenv().hitboxRefreshEnabled = false
+getgenv().hitboxRefreshInterval = 5
+
+-- Guardado de tamaños originales
+local originalSizes = {}
+
+-- ==================== FUNCIONES HITBOX EXPANDER ====================
+local function applyHitboxToPlayer(p)
+    if not getgenv().hitboxEnabled then return end
+    if p == player then return end
+    if not p.Character then return end
+    if getgenv().hitboxTeamcheck and p.Team == player.Team then return end
+
+    local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        if not originalSizes[p] then
+            originalSizes[p] = hrp.Size
+        end
+        hrp.Size = Vector3.new(getgenv().hitboxSizeX, getgenv().hitboxSizeY, getgenv().hitboxSizeZ)
+        hrp.Transparency = getgenv().hitboxTransparency
+        hrp.CanCollide = false
+    end
+end
+
+local function restoreOriginalSize(p)
+    if originalSizes[p] and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+        p.Character.HumanoidRootPart.Size = originalSizes[p]
+        p.Character.HumanoidRootPart.Transparency = 1
+        originalSizes[p] = nil
+    end
+end
+
+local function applyHitboxToAll()
+    for _, plr in ipairs(Players:GetPlayers()) do
+        applyHitboxToPlayer(plr)
+    end
+end
+
+local function restoreAllOriginal()
+    for plr, _ in pairs(originalSizes) do
+        restoreOriginalSize(plr)
+    end
+    originalSizes = {}
+end
+
+local function setupHitboxConnections(plr)
+    plr.CharacterAdded:Connect(function()
+        task.wait(0.1)
+        applyHitboxToPlayer(plr)
+    end)
+end
+
+for _, plr in ipairs(Players:GetPlayers()) do
+    setupHitboxConnections(plr)
+end
+
+Players.PlayerAdded:Connect(setupHitboxConnections)
+
+coroutine.wrap(function()
+    while true do
+        if getgenv().hitboxEnabled and getgenv().hitboxRefreshEnabled then
+            applyHitboxToAll()
+        end
+        task.wait(getgenv().hitboxRefreshInterval)
+    end
+end)()
+
+-- ==================== NOTIFICACIONES ====================
+local function showNotification(title, message, duration, nType)
+    duration = duration or notificationDuration
+
+    local notif = Instance.new("Frame")
+    notif.Size = UDim2.new(0, 320, 0, 70)
+    notif.Position = UDim2.new(1, -340, 0, 20 + (#currentNotifications * 80))
+    notif.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    notif.Parent = gui
+    notif.ZIndex = 100
+    notif.ClipsDescendants = true
+
+    local notifCorner = Instance.new("UICorner")
+    notifCorner.CornerRadius = UDim.new(0, 12)
+    notifCorner.Parent = notif
+
+    local notifBorder = Instance.new("Frame")
+    notifBorder.Size = UDim2.new(1, 0, 1, 0)
+    notifBorder.BackgroundTransparency = 1
+    notifBorder.BorderSizePixel = 3
+    notifBorder.BorderColor3 = nType == "success" and Color3.fromRGB(0, 255, 0) or
+                               nType == "error" and Color3.fromRGB(255, 0, 0) or
+                               Color3.fromRGB(0, 150, 255)
+    notifBorder.Parent = notif
+    notifBorder.ZIndex = 101
+
+    local notifBorderCorner = Instance.new("UICorner")
+    notifBorderCorner.CornerRadius = UDim.new(0, 12)
+    notifBorderCorner.Parent = notifBorder
+
+    local notifIcon = Instance.new("TextLabel")
+    notifIcon.Size = UDim2.new(0, 30, 1, 0)
+    notifIcon.Position = UDim2.new(0, 10, 0, 0)
+    notifIcon.BackgroundTransparency = 1
+    notifIcon.Text = nType == "success" and "✅" or nType == "error" and "❌" or "ℹ️"
+    notifIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+    notifIcon.Font = Enum.Font.GothamBold
+    notifIcon.TextSize = 24
+    notifIcon.Parent = notif
+    notifIcon.ZIndex = 101
+
+    local notifTitle = Instance.new("TextLabel")
+    notifTitle.Size = UDim2.new(1, -50, 0, 25)
+    notifTitle.Position = UDim2.new(0, 45, 0, 10)
+    notifTitle.BackgroundTransparency = 1
+    notifTitle.Text = title
+    notifTitle.TextColor3 = nType == "success" and Color3.fromRGB(0, 255, 0) or
+                            nType == "error" and Color3.fromRGB(255, 0, 0) or
+                            Color3.fromRGB(0, 150, 255)
+    notifTitle.Font = Enum.Font.GothamBold
+    notifTitle.TextSize = 16
+    notifTitle.TextXAlignment = Enum.TextXAlignment.Left
+    notifTitle.Parent = notif
+    notifTitle.ZIndex = 101
+
+    local notifMessage = Instance.new("TextLabel")
+    notifMessage.Size = UDim2.new(1, -50, 0, 30)
+    notifMessage.Position = UDim2.new(0, 45, 0, 30)
+    notifMessage.BackgroundTransparency = 1
+    notifMessage.Text = message
+    notifMessage.TextColor3 = Color3.fromRGB(255, 255, 255)
+    notifMessage.Font = Enum.Font.Gotham
+    notifMessage.TextSize = 13
+    notifMessage.TextXAlignment = Enum.TextXAlignment.Left
+    notifMessage.TextWrapped = true
+    notifMessage.Parent = notif
+    notifMessage.ZIndex = 101
+
+    table.insert(currentNotifications, notif)
+
+    notif.Position = UDim2.new(1, 0, 0, 20 + ((#currentNotifications-1) * 80))
+    notif.Rotation = -5
+    TweenService:Create(notif, TweenInfo.new(0.6, Enum.EasingStyle.Back), {
+        Position = UDim2.new(1, -340, 0, 20 + ((#currentNotifications-1) * 80)),
+        Rotation = 0
+    }):Play()
+
+    task.wait(duration)
+
+    TweenService:Create(notif, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+        Position = UDim2.new(1, 0, 0, 20 + ((#currentNotifications-1) * 80)),
+        Rotation = 5
+    }):Play()
+
+    task.wait(0.5)
+    notif:Destroy()
+
+    for i, n in ipairs(currentNotifications) do
+        if n == notif then
+            table.remove(currentNotifications, i)
+            break
+        end
+    end
+
+    for i, n in ipairs(currentNotifications) do
+        TweenService:Create(n, TweenInfo.new(0.3), {
+            Position = UDim2.new(1, -340, 0, 20 + ((i-1) * 80))
+        }):Play()
+    end
+end
+
 -- ==================== GUI MODERNA Y PROFESIONAL ====================
 local gui = Instance.new("ScreenGui")
 gui.Name = "FameCheats"
@@ -481,8 +686,6 @@ local function createModeSelector()
 end
 
 -- ==================== CONSTRUCCIÓN DE PESTAÑAS ====================
--- (Los elementos se crean dentro de cada contenedor y se asignan callbacks a las variables existentes)
-
 -- Contenido de Trigger Bot
 local triggerContent = Instance.new("Frame")
 triggerContent.Size = UDim2.new(1, 0, 1, 0)
@@ -743,3 +946,162 @@ TweenService:Create(main, TweenInfo.new(0.8, Enum.EasingStyle.Back), {
 -- Notificaciones de bienvenida
 showNotification("FAME CHEATS V2", "Interfaz moderna cargada", 3, "success")
 showNotification("CONTROLES", "CTRL DERECHO para abrir/cerrar", 3, "info")
+
+-- ==================== LÓGICA DEL TRIGGERBOT (sin cambios) ====================
+
+local function isKeyPressed(input)
+    if typeof(holdKey) == "EnumItem" then
+        if holdKey.EnumType == Enum.UserInputType then
+            return input.UserInputType == holdKey
+        elseif holdKey.EnumType == Enum.KeyCode then
+            return input.KeyCode == holdKey
+        end
+    end
+    return false
+end
+
+UserInputService.InputBegan:Connect(function(input)
+    if isKeyPressed(input) then
+        keyPressed = true
+        if enabled then
+            if holdMode then
+                triggerActive = true
+            else
+                triggerActive = not triggerActive
+            end
+        end
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if isKeyPressed(input) then
+        keyPressed = false
+        if enabled and holdMode then
+            triggerActive = false
+        end
+    end
+end)
+
+local function hasKnifeEquipped()
+    local character = player.Character
+    if not character then return false end
+    local tool = character:FindFirstChildOfClass("Tool")
+    if tool then
+        local toolName = tool.Name:lower()
+        local knifeNames = {"knife", "chicken", "pizza", "cranberry", "meet", "taco", "fists"}
+        for _, name in ipairs(knifeNames) do
+            if toolName:find(name) then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function getDistanceFromTarget(targetPart)
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return math.huge end
+    local rootPart = character.HumanoidRootPart
+    return (rootPart.Position - targetPart.Position).Magnitude
+end
+
+local function getTarget()
+    if not mouse.Target then return nil end
+
+    local target = mouse.Target
+    local model = target:FindFirstAncestorOfClass("Model")
+    if not model then return nil end
+
+    local plr = Players:GetPlayerFromCharacter(model)
+    if not plr or plr == player then return nil end
+
+    local hum = model:FindFirstChildOfClass("Humanoid")
+    if not hum or hum.Health <= 0 then return nil end
+
+    local distance = getDistanceFromTarget(target)
+    if distance > maxDistance then return nil end
+
+    return target
+end
+
+local function shoot()
+    local success = pcall(mouse1click)
+    if success then return end
+
+    success = pcall(function()
+        VirtualInputManager:SendMouseButtonEvent(mouse.X, mouse.Y, 0, true, game, 0)
+        task.wait(0.01)
+        VirtualInputManager:SendMouseButtonEvent(mouse.X, mouse.Y, 0, false, game, 0)
+    end)
+    if success then return end
+
+    success = pcall(function()
+        UserInputService:SendMouseButtonEvent(mouse.X, mouse.Y, 0, true, game, 0)
+        task.wait(0.01)
+        UserInputService:SendMouseButtonEvent(mouse.X, mouse.Y, 0, false, game, 0)
+    end)
+    if success then return end
+
+    local character = player.Character
+    if character then
+        local tool = character:FindFirstChildOfClass("Tool")
+        if tool then
+            pcall(function() tool:Activate() end)
+            pcall(function() tool:Click() end)
+            local remoteNames = {"Fire", "Shoot", "Remote", "WeaponRemote", "Activate"}
+            for _, name in ipairs(remoteNames) do
+                local remote = tool:FindFirstChild(name)
+                if remote and remote:IsA("RemoteEvent") then
+                    pcall(function() remote:FireServer() end)
+                end
+            end
+        end
+    end
+
+    pcall(function()
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+        task.wait(0.01)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+    end)
+end
+
+local lastShotTime = 0
+local mousePressed = false
+
+RunService.Heartbeat:Connect(function()
+    local shouldTrigger = enabled and triggerActive
+    if not shouldTrigger then
+        if mousePressed then
+            mouse1release()
+            mousePressed = false
+        end
+        return
+    end
+
+    local currentTime = tick()
+    if currentTime - lastShotTime < (triggerDelay / 1000) then
+        return
+    end
+
+    local target = getTarget()
+    if target then
+        if knifeCheck and hasKnifeEquipped() then
+            if mousePressed then
+                mouse1release()
+                mousePressed = false
+            end
+            return
+        end
+
+        if math.random(1, 100) <= precision then
+            shoot()
+            lastShotTime = currentTime
+            mousePressed = true
+        end
+    else
+        if mousePressed then
+            mouse1release()
+            mousePressed = false
+        end
+    end
+end)
