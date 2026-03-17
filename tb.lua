@@ -1,11 +1,15 @@
 -- TRIGGERBOT + HITBOX EXPANDER
--- by FAME - Glassmorphism 
+-- by FAME
 
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
+local Players
+local player
+local success, Players = pcall(game.GetService, game, "Players")
 local player = Players.LocalPlayer
-if not player then player = Players.PlayerAdded:Wait() end
+if not player then
+    player = Players.PlayerAdded:Wait()
+end
 local mouse = player:GetMouse()
 local TweenService = game:GetService("TweenService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
@@ -17,10 +21,10 @@ local knifeCheck = true
 local forceFieldCheck = false
 local holdMode = true
 local precision = 50
-local triggerDelay = 1          -- en ms
+local triggerDelay = 1
 local maxDistance = 500
 
-local holdKey = Enum.UserInputType.MouseButton2
+local holdKey = Enum.UserInputType.MouseButton2 
 local keyPressed = false
 local triggerActive = false
 local isSelectingKey = false
@@ -29,7 +33,7 @@ local guiVisible = true
 local notificationDuration = 2
 local currentNotifications = {}
 
--- ==================== VARIABLES HITBOX EXPANDER ====================
+-- ==================== VARIABLE HITBOX EXPANDER ====================
 getgenv().hitboxEnabled = false
 getgenv().hitboxTeamcheck = false
 getgenv().hitboxSizeX = 4
@@ -39,10 +43,10 @@ getgenv().hitboxTransparency = 0.9
 getgenv().hitboxRefreshEnabled = false
 getgenv().hitboxRefreshInterval = 5
 
--- Guardado de tamaños originales
+-- SAVE ORIGINAL SIZE
 local originalSizes = {}
 
--- ==================== FUNCIONES HITBOX EXPANDER ====================
+-- ==================== FUNCTIONS HITBOX EXPANDER ====================
 local function applyHitboxToPlayer(p)
     if not getgenv().hitboxEnabled then return end
     if p == player then return end
@@ -102,145 +106,21 @@ coroutine.wrap(function()
         task.wait(getgenv().hitboxRefreshInterval)
     end
 end)()
-
--- ==================== VARIABLES DE CONFIGURACIÓN ====================
-local config = {
-    toggleKey = Enum.KeyCode.RightControl,
-    themeColor = Color3.fromRGB(0, 180, 255),
-    accentColor = Color3.fromRGB(255, 80, 200),
-}
-
--- ==================== INTERFAZ ====================
+-- ==================== GUI ====================
 local gui = Instance.new("ScreenGui")
-gui.Name = "FameCheats"
-gui.Parent = game:FindFirstChild("CoreGui") or player.PlayerGui
+gui.Name = "TriggerBotGUI"
+gui.Parent = game:FindFirstChild("CoreGui") or game.Players.LocalPlayer.PlayerGui
 gui.ResetOnSpawn = false
 gui.DisplayOrder = 100
 gui.IgnoreGuiInset = true
+gui.Enabled = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Variables de estado
-local minimized = false
-local activeTab = "trigger"
-
--- ==================== NOTIFICACIONES GLASS ====================
-local function showNotification(title, message, duration, nType)
-    duration = duration or notificationDuration
-
-    local notif = Instance.new("Frame")
-    notif.Size = UDim2.new(0, 340, 0, 80)
-    notif.Position = UDim2.new(1, -360, 0, 20 + (#currentNotifications * 90))
-    notif.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-    notif.BackgroundTransparency = 0.2
-    notif.BorderSizePixel = 0
-    notif.Parent = gui
-    notif.ZIndex = 100
-    notif.ClipsDescendants = true
-
-    local blur = Instance.new("ImageLabel")
-    blur.Size = UDim2.new(1, 0, 1, 0)
-    blur.BackgroundTransparency = 1
-    blur.Image = "rbxassetid://3570695787"
-    blur.ImageColor3 = Color3.fromRGB(255, 255, 255)
-    blur.ImageTransparency = 0.95
-    blur.ScaleType = Enum.ScaleType.Slice
-    blur.Parent = notif
-
-    local notifCorner = Instance.new("UICorner")
-    notifCorner.CornerRadius = UDim.new(0, 16)
-    notifCorner.Parent = notif
-
-    local notifBorder = Instance.new("Frame")
-    notifBorder.Size = UDim2.new(1, 0, 1, 0)
-    notifBorder.BackgroundTransparency = 1
-    notifBorder.BorderSizePixel = 2
-    notifBorder.BorderColor3 = nType == "success" and Color3.fromRGB(0, 255, 0) or
-                               nType == "error" and Color3.fromRGB(255, 0, 0) or
-                               config.themeColor
-    notifBorder.Parent = notif
-    notifBorder.ZIndex = 101
-
-    local notifBorderCorner = Instance.new("UICorner")
-    notifBorderCorner.CornerRadius = UDim.new(0, 16)
-    notifBorderCorner.Parent = notifBorder
-
-    local notifIcon = Instance.new("TextLabel")
-    notifIcon.Size = UDim2.new(0, 40, 1, 0)
-    notifIcon.Position = UDim2.new(0, 10, 0, 0)
-    notifIcon.BackgroundTransparency = 1
-    notifIcon.Text = nType == "success" and "✅" or nType == "error" and "❌" or "⚡"
-    notifIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-    notifIcon.Font = Enum.Font.GothamBold
-    notifIcon.TextSize = 28
-    notifIcon.Parent = notif
-    notifIcon.ZIndex = 102
-
-    local notifTitle = Instance.new("TextLabel")
-    notifTitle.Size = UDim2.new(1, -60, 0, 30)
-    notifTitle.Position = UDim2.new(0, 55, 0, 10)
-    notifTitle.BackgroundTransparency = 1
-    notifTitle.Text = title
-    notifTitle.TextColor3 = nType == "success" and Color3.fromRGB(0, 255, 0) or
-                            nType == "error" and Color3.fromRGB(255, 0, 0) or
-                            config.themeColor
-    notifTitle.Font = Enum.Font.GothamBold
-    notifTitle.TextSize = 18
-    notifTitle.TextXAlignment = Enum.TextXAlignment.Left
-    notifTitle.Parent = notif
-    notifTitle.ZIndex = 102
-
-    local notifMessage = Instance.new("TextLabel")
-    notifMessage.Size = UDim2.new(1, -60, 0, 30)
-    notifMessage.Position = UDim2.new(0, 55, 0, 35)
-    notifMessage.BackgroundTransparency = 1
-    notifMessage.Text = message
-    notifMessage.TextColor3 = Color3.fromRGB(220, 220, 240)
-    notifMessage.Font = Enum.Font.Gotham
-    notifMessage.TextSize = 14
-    notifMessage.TextXAlignment = Enum.TextXAlignment.Left
-    notifMessage.TextWrapped = true
-    notifMessage.Parent = notif
-    notifMessage.ZIndex = 102
-
-    table.insert(currentNotifications, notif)
-
-    notif.Position = UDim2.new(1, 0, 0, 20 + ((#currentNotifications-1) * 90))
-    notif.Rotation = -3
-    TweenService:Create(notif, TweenInfo.new(0.6, Enum.EasingStyle.Back), {
-        Position = UDim2.new(1, -360, 0, 20 + ((#currentNotifications-1) * 90)),
-        Rotation = 0
-    }):Play()
-
-    task.wait(duration)
-
-    TweenService:Create(notif, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
-        Position = UDim2.new(1, 0, 0, 20 + ((#currentNotifications-1) * 90)),
-        Rotation = 3
-    }):Play()
-
-    task.wait(0.5)
-    notif:Destroy()
-
-    for i, n in ipairs(currentNotifications) do
-        if n == notif then
-            table.remove(currentNotifications, i)
-            break
-        end
-    end
-
-    for i, n in ipairs(currentNotifications) do
-        TweenService:Create(n, TweenInfo.new(0.3), {
-            Position = UDim2.new(1, -360, 0, 20 + ((i-1) * 90))
-        }):Play()
-    end
-end
-
--- ==================== VENTANA PRINCIPAL (GLASS) ====================
+-- MAIN FRAME
 local main = Instance.new("Frame")
 main.Size = UDim2.new(0, 500, 0, 680)
 main.Position = UDim2.new(0.5, -250, 0.5, -340)
-main.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
-main.BackgroundTransparency = 0.15
+main.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 main.BorderSizePixel = 0
 main.Active = true
 main.Draggable = true
@@ -249,916 +129,1198 @@ main.ClipsDescendants = true
 main.ZIndex = 2
 main.Visible = true
 
+
 local shadow = Instance.new("ImageLabel")
-shadow.Size = UDim2.new(1, 40, 1, 40)
-shadow.Position = UDim2.new(0, -20, 0, -20)
+shadow.Size = UDim2.new(1, 30, 1, 30)
+shadow.Position = UDim2.new(0, -15, 0, -15)
 shadow.BackgroundTransparency = 1
 shadow.Image = "rbxassetid://1316045217"
 shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-shadow.ImageTransparency = 0.7
+shadow.ImageTransparency = 0.3
 shadow.ScaleType = Enum.ScaleType.Slice
 shadow.SliceCenter = Rect.new(10, 10, 118, 118)
 shadow.Parent = main
 shadow.ZIndex = 1
 
-local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim.new(0, 24)
-mainCorner.Parent = main
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 16)
+corner.Parent = main
 
-local glassEffect = Instance.new("ImageLabel")
-glassEffect.Size = UDim2.new(1, 0, 1, 0)
-glassEffect.BackgroundTransparency = 1
-glassEffect.Image = "rbxassetid://3570695787"
-glassEffect.ImageColor3 = Color3.fromRGB(255, 255, 255)
-glassEffect.ImageTransparency = 0.92
-glassEffect.ScaleType = Enum.ScaleType.Slice
-glassEffect.Parent = main
+local border = Instance.new("Frame")
+border.Size = UDim2.new(1, 0, 1, 0)
+border.BackgroundTransparency = 1
+border.BorderSizePixel = 2
+border.BorderColor3 = Color3.fromRGB(0, 150, 255)
+border.Parent = main
+border.ZIndex = 3
 
--- ==================== BARRA SUPERIOR ====================
-local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 60)
-titleBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-titleBar.BackgroundTransparency = 0.95
-titleBar.BorderSizePixel = 0
-titleBar.Parent = main
-titleBar.ZIndex = 4
+local borderCorner = Instance.new("UICorner")
+borderCorner.CornerRadius = UDim.new(0, 16)
+borderCorner.Parent = border
 
-local titleCorner = Instance.new("UICorner")
-titleCorner.CornerRadius = UDim.new(0, 24)
-titleCorner.Parent = titleBar
+local borderGlow = Instance.new("Frame")
+borderGlow.Size = UDim2.new(1, 0, 1, 0)
+borderGlow.BackgroundTransparency = 0.95
+borderGlow.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+borderGlow.Parent = main
+borderGlow.ZIndex = 3
+
+local borderGlowCorner = Instance.new("UICorner")
+borderGlowCorner.CornerRadius = UDim.new(0, 16)
+borderGlowCorner.Parent = borderGlow
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -100, 1, 0)
-title.Position = UDim2.new(0, 20, 0, 0)
-title.BackgroundTransparency = 1
-title.Text = "TRIGGERBOT / FAME"
+title.Size = UDim2.new(1, 0, 0, 60)
+title.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+title.Text = "TRIGGERBOT | FAME"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.GothamBold
-title.TextSize = 24
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = titleBar
-title.ZIndex = 5
+title.TextSize = 20
+title.Parent = main
+title.ZIndex = 4
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 16)
+titleCorner.Parent = title
 
 local titleGradient = Instance.new("UIGradient")
 titleGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, config.themeColor),
-    ColorSequenceKeypoint.new(1, config.accentColor)
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 150, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(100, 200, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 255))
 })
 titleGradient.Rotation = 45
 titleGradient.Parent = title
 
-local function createWindowButton(text, posX, color, hoverColor)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 36, 0, 36)
-    btn.Position = UDim2.new(1, posX, 0.5, -18)
-    btn.BackgroundColor3 = color
-    btn.BackgroundTransparency = 0.3
-    btn.Text = text
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 20
-    btn.Parent = titleBar
-    btn.ZIndex = 5
+local titleLine = Instance.new("Frame")
+titleLine.Size = UDim2.new(0.8, 0, 0, 2)
+titleLine.Position = UDim2.new(0.1, 0, 1, -2)
+titleLine.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+titleLine.Parent = title
+titleLine.ZIndex = 4
 
-    local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 10)
-    btnCorner.Parent = btn
+local titleLineCorner = Instance.new("UICorner")
+titleLineCorner.CornerRadius = UDim.new(1, 0)
+titleLineCorner.Parent = titleLine
 
-    btn.MouseEnter:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = hoverColor, BackgroundTransparency = 0.1}):Play()
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 38, 0, 38)
+closeBtn.Position = UDim2.new(1, -48, 0, 11)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 22
+closeBtn.Parent = title
+closeBtn.ZIndex = 5
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 10)
+closeCorner.Parent = closeBtn
+
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 38, 0, 38)
+minimizeBtn.Position = UDim2.new(1, -96, 0, 11)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+minimizeBtn.Text = "−"
+minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 28
+minimizeBtn.Parent = title
+minimizeBtn.ZIndex = 5
+
+local minimizeCorner = Instance.new("UICorner")
+minimizeCorner.CornerRadius = UDim.new(0, 10)
+minimizeCorner.Parent = minimizeBtn
+
+local function createHoverEffect(button, color, hoverColor)
+    button.MouseEnter:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+            BackgroundColor3 = hoverColor or color,
+            Size = UDim2.new(0, 40, 0, 40),
+        }):Play()
+        button.Position = UDim2.new(1, button.Position.X.Offset - 2, 0, 10)
     end)
-    btn.MouseLeave:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = color, BackgroundTransparency = 0.3}):Play()
+    
+    button.MouseLeave:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+            BackgroundColor3 = button == closeBtn and Color3.fromRGB(255, 70, 70) or Color3.fromRGB(60, 60, 70),
+            Size = UDim2.new(0, 38, 0, 38),
+        }):Play()
+        button.Position = UDim2.new(1, button.Position.X.Offset + 2, 0, 11)
     end)
-
-    return btn
 end
 
-local closeBtn = createWindowButton("✕", -50, Color3.fromRGB(255, 70, 70), Color3.fromRGB(255, 100, 100))
-local minimizeBtn = createWindowButton("−", -90, Color3.fromRGB(100, 100, 120), Color3.fromRGB(130, 130, 150))
+createHoverEffect(closeBtn, Color3.fromRGB(255, 70, 70), Color3.fromRGB(255, 100, 100))
+createHoverEffect(minimizeBtn, Color3.fromRGB(60, 60, 70), Color3.fromRGB(80, 80, 90))
 
--- ==================== SIDEBAR CON IMÁGENES ====================
-local sidebar = Instance.new("Frame")
-sidebar.Size = UDim2.new(0, 90, 1, -60)
-sidebar.Position = UDim2.new(0, 0, 0, 60)
-sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-sidebar.BackgroundTransparency = 0.2
-sidebar.BorderSizePixel = 0
-sidebar.Parent = main
-sidebar.ZIndex = 4
+local scrollingFrame = Instance.new("ScrollingFrame")
+scrollingFrame.Size = UDim2.new(1, -30, 1, -70)
+scrollingFrame.Position = UDim2.new(0, 15, 0, 65)
+scrollingFrame.BackgroundTransparency = 1
+scrollingFrame.ScrollBarThickness = 6
+scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+scrollingFrame.Parent = main
+scrollingFrame.BorderSizePixel = 0
+scrollingFrame.ZIndex = 4
+scrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+scrollingFrame.ElasticBehavior = Enum.ElasticBehavior.Always
+scrollingFrame.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
 
-local sidebarCorner = Instance.new("UICorner")
-sidebarCorner.CornerRadius = UDim.new(0, 20)
-sidebarCorner.Parent = sidebar
+-- PADDING 
+local uiPadding = Instance.new("UIPadding")
+uiPadding.PaddingRight = UDim.new(0, 11)
+uiPadding.Parent = scrollingFrame
 
-local sidebarGradient = Instance.new("UIGradient")
-sidebarGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 40)),
+local gradientBg = Instance.new("UIGradient")
+gradientBg.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(28, 28, 35)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(20, 20, 25)),
     ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 20))
 })
-sidebarGradient.Rotation = 90
-sidebarGradient.Parent = sidebar
+gradientBg.Rotation = 45
+gradientBg.Parent = main
 
--- IDs de imagen (puedes cambiarlos)
-local iconAssets = {
-    trigger = "rbxassetid://6031075938",  -- rayo
-    hitbox = "rbxassetid://79177212497435",   -- caja
-    config = "rbxassetid://13300915301",   -- engranaje
-}
-
-local function createSidebarButtonWithImage(assetId, text, posY)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 70, 0, 70)
-    btn.Position = UDim2.new(0.5, -35, 0, posY)
-    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-    btn.BackgroundTransparency = 0.5
-    btn.Text = ""
-    btn.Parent = sidebar
-    btn.ZIndex = 5
-
-    local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 16)
-    btnCorner.Parent = btn
-
-    local icon = Instance.new("ImageLabel")
-    icon.Size = UDim2.new(0, 40, 0, 40)
-    icon.Position = UDim2.new(0.5, -20, 0, 5)
-    icon.BackgroundTransparency = 1
-    icon.Image = assetId
-    icon.ImageColor3 = Color3.fromRGB(200, 200, 200)
-    icon.Parent = btn
-    icon.ZIndex = 6
-
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Size = UDim2.new(1, 0, 0, 20)
-    textLabel.Position = UDim2.new(0, 0, 0, 45)
-    textLabel.BackgroundTransparency = 1
-    textLabel.Text = text
-    textLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-    textLabel.Font = Enum.Font.Gotham
-    textLabel.TextSize = 12
-    textLabel.Parent = btn
-    textLabel.ZIndex = 6
-
-    return btn, icon, textLabel
-end
-
-local triggerBtn, triggerIcon, triggerText = createSidebarButtonWithImage(iconAssets.trigger, "TRIGGER", 20)
-local hitboxBtn, hitboxIcon, hitboxText = createSidebarButtonWithImage(iconAssets.hitbox, "HITBOX", 110)
-local configBtn, configIcon, configText = createSidebarButtonWithImage(iconAssets.config, "CONFIG", 200)
-
-local activeIndicator = Instance.new("Frame")
-activeIndicator.Size = UDim2.new(0, 4, 0, 50)
-activeIndicator.Position = UDim2.new(0, 0, 0, 30)
-activeIndicator.BackgroundColor3 = config.themeColor
-activeIndicator.Parent = sidebar
-activeIndicator.ZIndex = 7
-
-local indicatorCorner = Instance.new("UICorner")
-indicatorCorner.CornerRadius = UDim.new(0, 4)
-indicatorCorner.Parent = activeIndicator
-
-local indicatorGlow = Instance.new("ImageLabel")
-indicatorGlow.Size = UDim2.new(1, 10, 1, 10)
-indicatorGlow.Position = UDim2.new(0, -5, 0, -5)
-indicatorGlow.BackgroundTransparency = 1
-indicatorGlow.Image = "rbxassetid://3570695787"
-indicatorGlow.ImageColor3 = config.themeColor
-indicatorGlow.ImageTransparency = 0.5
-indicatorGlow.Parent = activeIndicator
-indicatorGlow.ZIndex = 6
-
--- ==================== CONTENEDOR PRINCIPAL ====================
-local contentContainer = Instance.new("Frame")
-contentContainer.Size = UDim2.new(1, -90, 1, -60)
-contentContainer.Position = UDim2.new(0, 90, 0, 60)
-contentContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-contentContainer.BackgroundTransparency = 0.2
-contentContainer.BorderSizePixel = 0
-contentContainer.Parent = main
-contentContainer.ZIndex = 4
-contentContainer.ClipsDescendants = true
-
-local contentCorner = Instance.new("UICorner")
-contentCorner.CornerRadius = UDim.new(0, 20)
-contentCorner.Parent = contentContainer
-
-local contentScroller = Instance.new("ScrollingFrame")
-contentScroller.Size = UDim2.new(1, 0, 1, 0)
-contentScroller.BackgroundTransparency = 1
-contentScroller.BorderSizePixel = 0
-contentScroller.ScrollBarThickness = 6
-contentScroller.ScrollBarImageColor3 = config.themeColor
-contentScroller.CanvasSize = UDim2.new(0, 0, 0, 0)
-contentScroller.Parent = contentContainer
-contentScroller.ZIndex = 5
-contentScroller.AutomaticCanvasSize = Enum.AutomaticSize.Y
-contentScroller.ElasticBehavior = Enum.ElasticBehavior.Always
-contentScroller.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
-
-local padding = Instance.new("UIPadding")
-padding.PaddingLeft = UDim.new(0, 20)
-padding.PaddingRight = UDim.new(0, 20)
-padding.PaddingTop = UDim.new(0, 20)
-padding.PaddingBottom = UDim.new(0, 20)
-padding.Parent = contentScroller
+local dots = Instance.new("ImageLabel")
+dots.Size = UDim2.new(1, 0, 1, 0)
+dots.BackgroundTransparency = 1
+dots.Image = "rbxassetid://3570695787"
+dots.ImageColor3 = Color3.fromRGB(0, 150, 255)
+dots.ImageTransparency = 0.89
+dots.ScaleType = Enum.ScaleType.Tile
+dots.TileSize = UDim2.new(0, 50, 0, 50)
+dots.Parent = main
+dots.ZIndex = 2
 
 local layout = Instance.new("UIListLayout")
 layout.Padding = UDim.new(0, 15)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
-layout.Parent = contentScroller
+layout.Parent = scrollingFrame
+
 layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    contentScroller.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 40)
+    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 20)
 end)
 
--- ==================== COMPONENTES UI (TOGGLES, SLIDERS, ETC) ====================
-local function createToggle(text, default, color, onChange)
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 50)
-    frame.BackgroundTransparency = 1
-    frame.Parent = contentScroller
-    frame.ZIndex = 5
+-- ==================== TRIGGER BOT ====================
+local triggerSection = Instance.new("Frame")
+triggerSection.Size = UDim2.new(1, 0, 0, 45)
+triggerSection.BackgroundTransparency = 1
+triggerSection.Parent = scrollingFrame
+triggerSection.ZIndex = 4
 
+local triggerLine = Instance.new("Frame")
+triggerLine.Size = UDim2.new(0.3, 0, 0, 3)
+triggerLine.Position = UDim2.new(0, 0, 1, -3)
+triggerLine.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+triggerLine.Parent = triggerSection
+triggerLine.ZIndex = 4
+
+local triggerLineGlow = Instance.new("Frame")
+triggerLineGlow.Size = UDim2.new(1, 0, 1, 0)
+triggerLineGlow.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+triggerLineGlow.BackgroundTransparency = 0.7
+triggerLineGlow.Parent = triggerLine
+triggerLineGlow.ZIndex = 4
+
+local triggerLineCorner = Instance.new("UICorner")
+triggerLineCorner.CornerRadius = UDim.new(1, 0)
+triggerLineCorner.Parent = triggerLineGlow
+
+local triggerLabel = Instance.new("TextLabel")
+triggerLabel.Size = UDim2.new(1, -40, 1, 0)
+triggerLabel.BackgroundTransparency = 1
+triggerLabel.Text = "⚔ TRIGGER BOT"
+triggerLabel.TextColor3 = Color3.fromRGB(0, 150, 255)
+triggerLabel.Font = Enum.Font.GothamBold
+triggerLabel.TextSize = 20
+triggerLabel.TextXAlignment = Enum.TextXAlignment.Left
+triggerLabel.Parent = triggerSection
+triggerLabel.ZIndex = 4
+
+local triggerIcon = Instance.new("TextLabel")
+triggerIcon.Size = UDim2.new(0, 40, 1, 0)
+triggerIcon.Position = UDim2.new(1, -40, 0, 0)
+triggerIcon.BackgroundTransparency = 1
+triggerIcon.Text = "🎯"
+triggerIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+triggerIcon.Font = Enum.Font.GothamBold
+triggerIcon.TextSize = 24
+triggerIcon.Parent = triggerSection
+triggerIcon.ZIndex = 4
+
+
+local function createCheckbox(text, default, accentColor)
+    accentColor = accentColor or Color3.fromRGB(0, 150, 255)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 0, 35)
+    frame.BackgroundTransparency = 1
+    frame.Parent = scrollingFrame
+    frame.ZIndex = 4
+    
+    local checkbox = Instance.new("TextButton")
+    checkbox.Size = UDim2.new(0, 24, 0, 24)
+    checkbox.Position = UDim2.new(0, 0, 0.5, -12)
+    checkbox.BackgroundColor3 = default and accentColor or Color3.fromRGB(45, 45, 50)
+    checkbox.BorderSizePixel = 0
+    checkbox.Text = ""
+    checkbox.Parent = frame
+    checkbox.ZIndex = 4
+    checkbox.AutoButtonColor = false
+    
+    local checkCorner = Instance.new("UICorner")
+    checkCorner.CornerRadius = UDim.new(0, 8)
+    checkCorner.Parent = checkbox
+    
+ 
+    local checkGlow = Instance.new("Frame")
+    checkGlow.Size = UDim2.new(1, 2, 1, 2)
+    checkGlow.Position = UDim2.new(0, -1, 0, -1)
+    checkGlow.BackgroundTransparency = 1
+    checkGlow.BorderSizePixel = 2
+    checkGlow.BorderColor3 = default and accentColor or Color3.fromRGB(80, 80, 100)
+    checkGlow.Parent = checkbox
+    checkGlow.ZIndex = 5
+    
+    local checkGlowCorner = Instance.new("UICorner")
+    checkGlowCorner.CornerRadius = UDim.new(0, 9)
+    checkGlowCorner.Parent = checkGlow
+    
+    local checkMark = Instance.new("TextLabel")
+    checkMark.Size = UDim2.new(1, 0, 1, 0)
+    checkMark.BackgroundTransparency = 1
+    checkMark.Text = default and "✓" or ""
+    checkMark.TextColor3 = Color3.fromRGB(255, 255, 255)
+    checkMark.Font = Enum.Font.GothamBold
+    checkMark.TextSize = 18
+    checkMark.Parent = checkbox
+    checkMark.ZIndex = 4
+    
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -80, 1, 0)
+    label.Size = UDim2.new(1, -34, 1, 0)
+    label.Position = UDim2.new(0, 32, 0, 0)
     label.BackgroundTransparency = 1
     label.Text = text
-    label.TextColor3 = Color3.fromRGB(240, 240, 255)
-    label.Font = Enum.Font.Gotham
-    label.TextSize = 16
+    label.TextColor3 = Color3.fromRGB(230, 230, 250)
+    label.Font = Enum.Font.GothamBlack
+    label.TextSize = 15
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = frame
-    label.ZIndex = 6
-
-    local toggleBg = Instance.new("Frame")
-    toggleBg.Size = UDim2.new(0, 56, 0, 28)
-    toggleBg.Position = UDim2.new(1, -66, 0.5, -14)
-    toggleBg.BackgroundColor3 = default and color or Color3.fromRGB(50, 50, 55)
-    toggleBg.Parent = frame
-    toggleBg.ZIndex = 6
-
-    local toggleCorner = Instance.new("UICorner")
-    toggleCorner.CornerRadius = UDim.new(1, 0)
-    toggleCorner.Parent = toggleBg
-
-    local toggleCircle = Instance.new("Frame")
-    toggleCircle.Size = UDim2.new(0, 24, 0, 24)
-    toggleCircle.Position = default and UDim2.new(1, -26, 0.5, -12) or UDim2.new(0, 2, 0.5, -12)
-    toggleCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    toggleCircle.Parent = toggleBg
-    toggleCircle.ZIndex = 7
-
-    local circleCorner = Instance.new("UICorner")
-    circleCorner.CornerRadius = UDim.new(1, 0)
-    circleCorner.Parent = toggleCircle
-
-    local glow = Instance.new("ImageLabel")
-    glow.Size = UDim2.new(1, 12, 1, 12)
-    glow.Position = UDim2.new(0, -6, 0, -6)
-    glow.BackgroundTransparency = 1
-    glow.Image = "rbxassetid://3570695787"
-    glow.ImageColor3 = color
-    glow.ImageTransparency = default and 0.4 or 1
-    glow.Parent = toggleBg
-    glow.ZIndex = 5
-
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(1, 0, 1, 0)
-    button.BackgroundTransparency = 1
-    button.Text = ""
-    button.Parent = frame
-    button.ZIndex = 8
-
-    local state = default
-
-    local function setState(newState)
-        state = newState
-        TweenService:Create(toggleBg, TweenInfo.new(0.3, Enum.EasingStyle.Exponential), {
-            BackgroundColor3 = state and color or Color3.fromRGB(50, 50, 55)
-        }):Play()
-        TweenService:Create(toggleCircle, TweenInfo.new(0.3, Enum.EasingStyle.Exponential), {
-            Position = state and UDim2.new(1, -26, 0.5, -12) or UDim2.new(0, 2, 0.5, -12)
-        }):Play()
-        TweenService:Create(glow, TweenInfo.new(0.3), {ImageTransparency = state and 0.4 or 1}):Play()
-        if onChange then onChange(state) end
-    end
-
-    button.MouseButton1Click:Connect(function() setState(not state) end)
-
-    return {frame = frame, setState = setState}
+    label.ZIndex = 4
+    
+    -- Efecto hover
+    checkbox.MouseEnter:Connect(function()
+        if checkbox.BackgroundColor3 ~= accentColor then
+            TweenService:Create(checkbox, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(65, 65, 75),
+                Size = UDim2.new(0, 26, 0, 26)
+            }):Play()
+            checkbox.Position = UDim2.new(0, -1, 0.5, -13)
+        end
+    end)
+    
+    checkbox.MouseLeave:Connect(function()
+        if checkbox.BackgroundColor3 ~= accentColor then
+            TweenService:Create(checkbox, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(45, 45, 50),
+                Size = UDim2.new(0, 24, 0, 24)
+            }):Play()
+            checkbox.Position = UDim2.new(0, 0, 0.5, -12)
+        end
+    end)
+    
+    return {
+        frame = frame,
+        checkbox = checkbox,
+        checkMark = checkMark,
+        checkGlow = checkGlow,
+        value = default,
+        accentColor = accentColor
+    }
 end
 
-local function createSlider(text, value, min, max, suffix, color, onChange)
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 70)
-    frame.BackgroundTransparency = 1
-    frame.Parent = contentScroller
-    frame.ZIndex = 5
 
+local enableTrigger = createCheckbox("Enable Trigger Bot", false, Color3.fromRGB(0, 150, 255))
+local knifeCheckbox = createCheckbox("Knife Check", true, Color3.fromRGB(0, 150, 255))
+local forceFieldCheckbox = createCheckbox("Force Field Check", false, Color3.fromRGB(0, 150, 255))
+
+
+local keyFrame = Instance.new("Frame")
+keyFrame.Size = UDim2.new(1, 0, 0, 85)
+keyFrame.BackgroundTransparency = 1
+keyFrame.Parent = scrollingFrame
+keyFrame.ZIndex = 4
+
+local keyLabel = Instance.new("TextLabel")
+keyLabel.Size = UDim2.new(1, 0, 0, 30)
+keyLabel.BackgroundTransparency = 1
+keyLabel.Text = "🔑 KEYBIND CONFIGURATION"
+keyLabel.TextColor3 = Color3.fromRGB(200, 200, 220)
+keyLabel.Font = Enum.Font.GothamBold
+keyLabel.TextSize = 15
+keyLabel.TextXAlignment = Enum.TextXAlignment.Left
+keyLabel.Parent = keyFrame
+keyLabel.ZIndex = 4
+
+local modeBtn = Instance.new("TextButton")
+modeBtn.Size = UDim2.new(0.48, 0, 0, 45)
+modeBtn.Position = UDim2.new(0, 0, 0, 35)
+modeBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+modeBtn.Text = "HOLD"
+modeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+modeBtn.Font = Enum.Font.GothamBlack
+modeBtn.TextSize = 16
+modeBtn.Parent = keyFrame
+modeBtn.ZIndex = 4
+modeBtn.AutoButtonColor = false
+
+local modeCorner = Instance.new("UICorner")
+modeCorner.CornerRadius = UDim.new(0, 10)
+modeCorner.Parent = modeBtn
+
+local modeGlow = Instance.new("Frame")
+modeGlow.Size = UDim2.new(1, 4, 1, 4)
+modeGlow.Position = UDim2.new(0, -2, 0, -2)
+modeGlow.BackgroundTransparency = 1
+modeGlow.BorderSizePixel = 2
+modeGlow.BorderColor3 = Color3.fromRGB(0, 150, 255)
+modeGlow.Parent = modeBtn
+modeGlow.ZIndex = 5
+
+local modeGlowCorner = Instance.new("UICorner")
+modeGlowCorner.CornerRadius = UDim.new(0, 11)
+modeGlowCorner.Parent = modeGlow
+
+modeBtn.MouseEnter:Connect(function()
+    TweenService:Create(modeBtn, TweenInfo.new(0.2), {
+        BackgroundColor3 = holdMode and Color3.fromRGB(0, 170, 255) or Color3.fromRGB(255, 170, 0),
+        Size = UDim2.new(0.48, 5, 0, 47)
+    }):Play()
+end)
+
+modeBtn.MouseLeave:Connect(function()
+    TweenService:Create(modeBtn, TweenInfo.new(0.2), {
+        BackgroundColor3 = holdMode and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(255, 150, 0),
+        Size = UDim2.new(0.48, 0, 0, 45)
+    }):Play()
+end)
+
+local keySelectBtn = Instance.new("TextButton")
+keySelectBtn.Size = UDim2.new(0.48, 0, 0, 45)
+keySelectBtn.Position = UDim2.new(0.52, 0, 0, 35)
+keySelectBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+keySelectBtn.Text = "RIGHT CLICK (DEFAULT)"
+keySelectBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+keySelectBtn.Font = Enum.Font.GothamBlack
+keySelectBtn.TextSize = 14
+keySelectBtn.Parent = keyFrame
+keySelectBtn.ZIndex = 4
+keySelectBtn.AutoButtonColor = false
+
+local keyCorner = Instance.new("UICorner")
+keyCorner.CornerRadius = UDim.new(0, 10)
+keyCorner.Parent = keySelectBtn
+
+local keyGlow = Instance.new("Frame")
+keyGlow.Size = UDim2.new(1, 4, 1, 4)
+keyGlow.Position = UDim2.new(0, -2, 0, -2)
+keyGlow.BackgroundTransparency = 1
+keyGlow.BorderSizePixel = 2
+keyGlow.BorderColor3 = Color3.fromRGB(0, 150, 255)
+keyGlow.Visible = false
+keyGlow.Parent = keySelectBtn
+keyGlow.ZIndex = 5
+
+local keyGlowCorner = Instance.new("UICorner")
+keyGlowCorner.CornerRadius = UDim.new(0, 11)
+keyGlowCorner.Parent = keyGlow
+
+keySelectBtn.MouseEnter:Connect(function()
+    if not isSelectingKey then
+        TweenService:Create(keySelectBtn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(60, 60, 70),
+            Size = UDim2.new(0.48, 5, 0, 47)
+        }):Play()
+    end
+end)
+
+keySelectBtn.MouseLeave:Connect(function()
+    if not isSelectingKey then
+        TweenService:Create(keySelectBtn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(45, 45, 50),
+            Size = UDim2.new(0.48, 0, 0, 45)
+        }):Play()
+    end
+end)
+
+
+local configSection = Instance.new("Frame")
+configSection.Size = UDim2.new(1, 0, 0, 45)
+configSection.BackgroundTransparency = 1
+configSection.Parent = scrollingFrame
+configSection.ZIndex = 4
+
+local configLine = Instance.new("Frame")
+configLine.Size = UDim2.new(0.3, 0, 0, 3)
+configLine.Position = UDim2.new(0, 0, 1, -3)
+configLine.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+configLine.Parent = configSection
+configLine.ZIndex = 4
+
+local configLineGlow = Instance.new("Frame")
+configLineGlow.Size = UDim2.new(1, 0, 1, 0)
+configLineGlow.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+configLineGlow.BackgroundTransparency = 0.7
+configLineGlow.Parent = configLine
+configLineGlow.ZIndex = 4
+
+local configLineCorner = Instance.new("UICorner")
+configLineCorner.CornerRadius = UDim.new(1, 0)
+configLineCorner.Parent = configLineGlow
+
+local configLabel = Instance.new("TextLabel")
+configLabel.Size = UDim2.new(1, -40, 1, 0)
+configLabel.BackgroundTransparency = 1
+configLabel.Text = "⚙️ CONFIGURATION"
+configLabel.TextColor3 = Color3.fromRGB(0, 150, 255)
+configLabel.Font = Enum.Font.GothamBold
+configLabel.TextSize = 20
+configLabel.TextXAlignment = Enum.TextXAlignment.Left
+configLabel.Parent = configSection
+configLabel.ZIndex = 4
+
+local configIcon = Instance.new("TextLabel")
+configIcon.Size = UDim2.new(0, 40, 1, 0)
+configIcon.Position = UDim2.new(1, -40, 0, 0)
+configIcon.BackgroundTransparency = 1
+configIcon.Text = "🔧"
+configIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+configIcon.Font = Enum.Font.GothamBold
+configIcon.TextSize = 24
+configIcon.Parent = configSection
+configIcon.ZIndex = 4
+
+
+local function createSlider(text, value, min, max, suffix, color)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 0, 60)
+    frame.BackgroundTransparency = 1
+    frame.Parent = scrollingFrame
+    frame.ZIndex = 4
+    
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -80, 0, 25)
+    label.Size = UDim2.new(0.6, 0, 0, 25)
     label.BackgroundTransparency = 1
     label.Text = text
-    label.TextColor3 = Color3.fromRGB(240, 240, 255)
-    label.Font = Enum.Font.Gotham
-    label.TextSize = 16
+    label.TextColor3 = Color3.fromRGB(230, 230, 250)
+    label.Font = Enum.Font.GothamBlack
+    label.TextSize = 15
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = frame
-    label.ZIndex = 6
-
+    label.ZIndex = 4
+    
+    local valueBg = Instance.new("Frame")
+    valueBg.Size = UDim2.new(0, 70, 0, 25)
+    valueBg.Position = UDim2.new(1, -70, 0, 0)
+    valueBg.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    valueBg.Parent = frame
+    valueBg.ZIndex = 4
+    
+    local valueBgCorner = Instance.new("UICorner")
+    valueBgCorner.CornerRadius = UDim.new(0, 6)
+    valueBgCorner.Parent = valueBg
+    
     local valueLabel = Instance.new("TextLabel")
-    valueLabel.Size = UDim2.new(0, 70, 0, 25)
-    valueLabel.Position = UDim2.new(1, -70, 0, 0)
+    valueLabel.Size = UDim2.new(1, 0, 1, 0)
     valueLabel.BackgroundTransparency = 1
     valueLabel.Text = value .. (suffix or "")
-    valueLabel.TextColor3 = color
+    valueLabel.TextColor3 = color or Color3.fromRGB(0, 150, 255)
     valueLabel.Font = Enum.Font.GothamBold
-    valueLabel.TextSize = 16
-    valueLabel.TextXAlignment = Enum.TextXAlignment.Right
-    valueLabel.Parent = frame
-    valueLabel.ZIndex = 6
-
+    valueLabel.TextSize = 14
+    valueLabel.Parent = valueBg
+    valueLabel.ZIndex = 4
+    
     local sliderBg = Instance.new("Frame")
-    sliderBg.Size = UDim2.new(1, 0, 0, 8)
-    sliderBg.Position = UDim2.new(0, 0, 0, 40)
-    sliderBg.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+    sliderBg.Size = UDim2.new(1, 0, 0, 10)
+    sliderBg.Position = UDim2.new(0, 0, 0, 35)
+    sliderBg.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
     sliderBg.Parent = frame
-    sliderBg.ZIndex = 6
-
+    sliderBg.ZIndex = 4
+    
     local sliderBgCorner = Instance.new("UICorner")
     sliderBgCorner.CornerRadius = UDim.new(1, 0)
     sliderBgCorner.Parent = sliderBg
-
+    
     local percent = (value - min) / (max - min)
     local sliderFill = Instance.new("Frame")
     sliderFill.Size = UDim2.new(percent, 0, 1, 0)
-    sliderFill.BackgroundColor3 = color
+    sliderFill.BackgroundColor3 = color or Color3.fromRGB(0, 150, 255)
     sliderFill.Parent = sliderBg
-    sliderFill.ZIndex = 7
-
-    local fillCorner = Instance.new("UICorner")
-    fillCorner.CornerRadius = UDim.new(1, 0)
-    fillCorner.Parent = sliderFill
-
-    local fillGradient = Instance.new("UIGradient")
-    fillGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, color),
-        ColorSequenceKeypoint.new(1, color:Lerp(Color3.fromRGB(255, 255, 255), 0.4))
-    })
-    fillGradient.Rotation = 45
-    fillGradient.Parent = sliderFill
-
-    local thumb = Instance.new("Frame")
-    thumb.Size = UDim2.new(0, 16, 0, 16)
-    thumb.Position = UDim2.new(percent, -8, 0.5, -8)
-    thumb.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    thumb.Parent = sliderBg
-    thumb.ZIndex = 8
-
-    local thumbCorner = Instance.new("UICorner")
-    thumbCorner.CornerRadius = UDim.new(1, 0)
-    thumbCorner.Parent = thumb
-
-    local thumbGlow = Instance.new("ImageLabel")
-    thumbGlow.Size = UDim2.new(1, 8, 1, 8)
-    thumbGlow.Position = UDim2.new(0, -4, 0, -4)
-    thumbGlow.BackgroundTransparency = 1
-    thumbGlow.Image = "rbxassetid://3570695787"
-    thumbGlow.ImageColor3 = color
-    thumbGlow.ImageTransparency = 0.3
-    thumbGlow.Parent = thumb
-    thumbGlow.ZIndex = 7
-
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(1, 0, 1, 0)
-    button.BackgroundTransparency = 1
-    button.Text = ""
-    button.Parent = sliderBg
-    button.ZIndex = 9
-
-    local currentVal = value
-    local dragging = false
-
-    local function updateFromMouse(mouseX)
-        local absX = sliderBg.AbsolutePosition.X
-        local width = sliderBg.AbsoluteSize.X
-        local newPercent = (mouseX - absX) / width
-        newPercent = math.clamp(newPercent, 0, 1)
-        sliderFill.Size = UDim2.new(newPercent, 0, 1, 0)
-        thumb.Position = UDim2.new(newPercent, -8, 0.5, -8)
-        currentVal = min + (max - min) * newPercent
-        valueLabel.Text = math.floor(currentVal * 100) / 100 .. (suffix or "")
-        if onChange then onChange(currentVal) end
+    sliderFill.ZIndex = 4
+    
+    local sliderFillCorner = Instance.new("UICorner")
+    sliderFillCorner.CornerRadius = UDim.new(1, 0)
+    sliderFillCorner.Parent = sliderFill
+    
+    local glow = Instance.new("Frame")
+    glow.Size = UDim2.new(1, 0, 1, 0)
+    glow.BackgroundTransparency = 0.7
+    glow.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    glow.Parent = sliderFill
+    glow.ZIndex = 5
+    
+    local glowCorner = Instance.new("UICorner")
+    glowCorner.CornerRadius = UDim.new(1, 0)
+    glowCorner.Parent = glow
+    
+    local sliderButton = Instance.new("TextButton")
+    sliderButton.Size = UDim2.new(1, 0, 1, 0)
+    sliderButton.BackgroundTransparency = 1
+    sliderButton.Text = ""
+    sliderButton.Parent = sliderBg
+    sliderButton.ZIndex = 5
+    
+    for i = 0, 4 do
+        local point = Instance.new("Frame")
+        point.Size = UDim2.new(0, 2, 0, 6)
+        point.Position = UDim2.new(i/4, -1, 0.5, -3)
+        point.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+        point.Parent = sliderBg
+        point.ZIndex = 4
+        
+        local pointCorner = Instance.new("UICorner")
+        pointCorner.CornerRadius = UDim.new(1, 0)
+        pointCorner.Parent = point
     end
+    
+    return {frame = frame, sliderFill = sliderFill, valueLabel = valueLabel, value = value, min = min, max = max, suffix = suffix, button = sliderButton}
+end
 
-    button.MouseButton1Down:Connect(function(input)
-        dragging = true
-        updateFromMouse(input.Position.X)
-    end)
+local precisionSlider = createSlider("Precision", 50, 0, 100, "%", Color3.fromRGB(0, 200, 100))
+local delaySlider = createSlider("Trigger Delay", 1, 0, 100, "ms", Color3.fromRGB(255, 150, 0))
+local distanceSlider = createSlider("Max Distance", 500, 0, 5000, "", Color3.fromRGB(200, 100, 255))
 
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            updateFromMouse(UserInputService:GetMouseLocation().X)
+-- ==================== HITBOX EXPANDER ====================
+local hitboxSection = Instance.new("Frame")
+hitboxSection.Size = UDim2.new(1, 0, 0, 45)
+hitboxSection.BackgroundTransparency = 1
+hitboxSection.Parent = scrollingFrame
+hitboxSection.ZIndex = 4
+
+local hitboxLine = Instance.new("Frame")
+hitboxLine.Size = UDim2.new(0.3, 0, 0, 3)
+hitboxLine.Position = UDim2.new(0, 0, 1, -3)
+hitboxLine.BackgroundColor3 = Color3.fromRGB(255, 70, 200)
+hitboxLine.Parent = hitboxSection
+hitboxLine.ZIndex = 4
+
+local hitboxLineGlow = Instance.new("Frame")
+hitboxLineGlow.Size = UDim2.new(1, 0, 1, 0)
+hitboxLineGlow.BackgroundColor3 = Color3.fromRGB(255, 70, 200)
+hitboxLineGlow.BackgroundTransparency = 0.7
+hitboxLineGlow.Parent = hitboxLine
+hitboxLineGlow.ZIndex = 4
+
+local hitboxLineCorner = Instance.new("UICorner")
+hitboxLineCorner.CornerRadius = UDim.new(1, 0)
+hitboxLineCorner.Parent = hitboxLineGlow
+
+local hitboxLabel = Instance.new("TextLabel")
+hitboxLabel.Size = UDim2.new(1, -40, 1, 0)
+hitboxLabel.BackgroundTransparency = 1
+hitboxLabel.Text = "📦 HITBOX EXPANDER"
+hitboxLabel.TextColor3 = Color3.fromRGB(255, 70, 200)
+hitboxLabel.Font = Enum.Font.GothamBold
+hitboxLabel.TextSize = 20
+hitboxLabel.TextXAlignment = Enum.TextXAlignment.Left
+hitboxLabel.Parent = hitboxSection
+hitboxLabel.ZIndex = 4
+
+local hitboxIcon = Instance.new("TextLabel")
+hitboxIcon.Size = UDim2.new(0, 40, 1, 0)
+hitboxIcon.Position = UDim2.new(1, -40, 0, 0)
+hitboxIcon.BackgroundTransparency = 1
+hitboxIcon.Text = "🎯"
+hitboxIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+hitboxIcon.Font = Enum.Font.GothamBold
+hitboxIcon.TextSize = 24
+hitboxIcon.Parent = hitboxSection
+hitboxIcon.ZIndex = 4
+
+-- Checkbox: Habilitar hitbox (usamos color rosa)
+local enableHitbox = createCheckbox("Enable Hitbox Expander", false, Color3.fromRGB(255, 70, 200))
+
+-- Checkbox: Team check
+local teamcheckHitbox = createCheckbox("Team Check (only enemies)", false, Color3.fromRGB(255, 70, 200))
+
+-- Checkbox: Refresco automático
+local refreshCheck = createCheckbox("Auto Refresh (fix respawn)", false, Color3.fromRGB(255, 70, 200))
+
+-- Sliders for size x y z
+local sizeXSlider = createSlider("Size X", 4, 1, 20, "", Color3.fromRGB(255, 70, 200))
+local draggingSizeX = false
+sizeXSlider.button.MouseButton1Down:Connect(function(input)
+    draggingSizeX = true
+    local function update()
+        local percent = (UserInputService:GetMouseLocation().X - sizeXSlider.button.AbsolutePosition.X) / sizeXSlider.button.AbsoluteSize.X
+        percent = math.clamp(percent, 0, 1)
+        sizeXSlider.sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+        local val = math.floor(percent * 19) + 1  -- 1 a 20
+        getgenv().hitboxSizeX = val
+        sizeXSlider.valueLabel.Text = val
+        if getgenv().hitboxEnabled then
+            applyHitboxToAll()
+        end
+    end
+    update()
+    local conn
+    conn = UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and draggingSizeX then
+            update()
         end
     end)
-
     UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and draggingSizeX then
+            draggingSizeX = false
+            conn:Disconnect()
         end
     end)
+end)
 
-    return {frame = frame, setValue = function(val)
-        currentVal = val
-        local newPercent = (val - min) / (max - min)
-        sliderFill.Size = UDim2.new(newPercent, 0, 1, 0)
-        thumb.Position = UDim2.new(newPercent, -8, 0.5, -8)
-        valueLabel.Text = math.floor(val * 100) / 100 .. (suffix or "")
-    end}
-end
-
-local function createKeybindButton(text, defaultKeyText, defaultKey)
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 50)
-    frame.BackgroundTransparency = 1
-    frame.Parent = contentScroller
-    frame.ZIndex = 5
-
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -150, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Text = text
-    label.TextColor3 = Color3.fromRGB(240, 240, 255)
-    label.Font = Enum.Font.Gotham
-    label.TextSize = 16
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = frame
-    label.ZIndex = 6
-
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 140, 0, 38)
-    button.Position = UDim2.new(1, -140, 0.5, -19)
-    button.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-    button.BackgroundTransparency = 0.3
-    button.Text = defaultKeyText
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.Font = Enum.Font.Gotham
-    button.TextSize = 14
-    button.Parent = frame
-    button.ZIndex = 6
-
-    local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 12)
-    btnCorner.Parent = button
-
-    local btnShadow = Instance.new("ImageLabel")
-    btnShadow.Size = UDim2.new(1, 10, 1, 10)
-    btnShadow.Position = UDim2.new(0, -5, 0, -5)
-    btnShadow.BackgroundTransparency = 1
-    btnShadow.Image = "rbxassetid://1316045217"
-    btnShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-    btnShadow.ImageTransparency = 0.7
-    btnShadow.ScaleType = Enum.ScaleType.Slice
-    btnShadow.SliceCenter = Rect.new(10, 10, 118, 118)
-    btnShadow.Parent = button
-    btnShadow.ZIndex = 5
-
-    return {frame = frame, button = button}
-end
-
-local function createModeSelector()
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 50)
-    frame.BackgroundTransparency = 1
-    frame.Parent = contentScroller
-    frame.ZIndex = 5
-
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -150, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Text = "Mode"
-    label.TextColor3 = Color3.fromRGB(240, 240, 255)
-    label.Font = Enum.Font.Gotham
-    label.TextSize = 16
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = frame
-    label.ZIndex = 6
-
-    local holdBtn = Instance.new("TextButton")
-    holdBtn.Size = UDim2.new(0, 70, 0, 38)
-    holdBtn.Position = UDim2.new(1, -140, 0.5, -19)
-    holdBtn.BackgroundColor3 = config.themeColor
-    holdBtn.BackgroundTransparency = 0.2
-    holdBtn.Text = "HOLD"
-    holdBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    holdBtn.Font = Enum.Font.GothamBold
-    holdBtn.TextSize = 14
-    holdBtn.Parent = frame
-    holdBtn.ZIndex = 6
-
-    local toggleBtn = Instance.new("TextButton")
-    toggleBtn.Size = UDim2.new(0, 70, 0, 38)
-    toggleBtn.Position = UDim2.new(1, -70, 0.5, -19)
-    toggleBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-    toggleBtn.BackgroundTransparency = 0.3
-    toggleBtn.Text = "TOGGLE"
-    toggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    toggleBtn.Font = Enum.Font.Gotham
-    toggleBtn.TextSize = 14
-    toggleBtn.Parent = frame
-    toggleBtn.ZIndex = 6
-
-    for _, btn in ipairs({holdBtn, toggleBtn}) do
-        local btnCorner = Instance.new("UICorner")
-        btnCorner.CornerRadius = UDim.new(0, 12)
-        btnCorner.Parent = btn
+local sizeYSlider = createSlider("Size Y", 4, 1, 20, "", Color3.fromRGB(255, 70, 200))
+local draggingSizeY = false
+sizeYSlider.button.MouseButton1Down:Connect(function(input)
+    draggingSizeY = true
+    local function update()
+        local percent = (UserInputService:GetMouseLocation().X - sizeYSlider.button.AbsolutePosition.X) / sizeYSlider.button.AbsoluteSize.X
+        percent = math.clamp(percent, 0, 1)
+        sizeYSlider.sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+        local val = math.floor(percent * 19) + 1
+        getgenv().hitboxSizeY = val
+        sizeYSlider.valueLabel.Text = val
+        if getgenv().hitboxEnabled then
+            applyHitboxToAll()
+        end
     end
-
-    return {frame = frame, holdBtn = holdBtn, toggleBtn = toggleBtn}
-end
-
--- ==================== CONTENIDO TRIGGER ====================
-local triggerContent = Instance.new("Frame")
-triggerContent.Size = UDim2.new(1, 0, 1, 0)
-triggerContent.BackgroundTransparency = 1
-triggerContent.Parent = contentScroller
-triggerContent.Visible = true
-triggerContent.ZIndex = 5
-
-local triggerLayout = Instance.new("UIListLayout")
-triggerLayout.Padding = UDim.new(0, 15)
-triggerLayout.SortOrder = Enum.SortOrder.LayoutOrder
-triggerLayout.Parent = triggerContent
-
-local enableToggle = createToggle("Enable Trigger Bot", false, config.themeColor, function(new)
-    enabled = new
-    showNotification("Trigger Bot", new and "Enabled" or "Disabled", 2, new and "success" or "error")
-end)
-enableToggle.frame.Parent = triggerContent
-
-local keybindBtn = createKeybindButton("Keybind", "Right Click", Enum.UserInputType.MouseButton2)
-keybindBtn.frame.Parent = triggerContent
-
-local modeSelector = createModeSelector()
-modeSelector.frame.Parent = triggerContent
-
-local knifeToggle = createToggle("Ignore knife", true, config.themeColor, function(new) knifeCheck = new end)
-knifeToggle.frame.Parent = triggerContent
-
-local forceFieldToggle = createToggle("Ignore ForceField", false, config.themeColor, function(new) forceFieldCheck = new end)
-forceFieldToggle.frame.Parent = triggerContent
-
-local precisionSlider = createSlider("Precision", 50, 0, 100, "%", Color3.fromRGB(0, 200, 100), function(new) precision = new end)
-precisionSlider.frame.Parent = triggerContent
-
-local delaySlider = createSlider("Delay", 1, 0, 100, "ms", Color3.fromRGB(255, 150, 0), function(new) triggerDelay = new end)
-delaySlider.frame.Parent = triggerContent
-
-local distanceSlider = createSlider("Max range", 500, 0, 5000, "", Color3.fromRGB(200, 100, 255), function(new) maxDistance = new end)
-distanceSlider.frame.Parent = triggerContent
-
--- ==================== CONTENIDO HITBOX ====================
-local hitboxContent = Instance.new("Frame")
-hitboxContent.Size = UDim2.new(1, 0, 1, 0)
-hitboxContent.BackgroundTransparency = 1
-hitboxContent.Parent = contentScroller
-hitboxContent.Visible = false
-hitboxContent.ZIndex = 5
-
-local hitboxLayout = Instance.new("UIListLayout")
-hitboxLayout.Padding = UDim.new(0, 15)
-hitboxLayout.SortOrder = Enum.SortOrder.LayoutOrder
-hitboxLayout.Parent = hitboxContent
-
-local enableHitboxToggle = createToggle("Enable Hitbox Expander", false, config.accentColor, function(new)
-    getgenv().hitboxEnabled = new
-    if new then applyHitboxToAll(); showNotification("Hitbox", "Enabled", 2, "success")
-    else restoreAllOriginal(); showNotification("Hitbox", "Disabled", 2, "error") end
-end)
-enableHitboxToggle.frame.Parent = hitboxContent
-
-local teamcheckToggle = createToggle("Team Check (only enemies)", false, config.accentColor, function(new)
-    getgenv().hitboxTeamcheck = new
-    if getgenv().hitboxEnabled then restoreAllOriginal(); applyHitboxToAll() end
-end)
-teamcheckToggle.frame.Parent = hitboxContent
-
-local sizeXSlider = createSlider("Size X", 4, 1, 20, "", config.accentColor, function(new)
-    getgenv().hitboxSizeX = new; if getgenv().hitboxEnabled then applyHitboxToAll() end
-end)
-sizeXSlider.frame.Parent = hitboxContent
-
-local sizeYSlider = createSlider("Size Y", 4, 1, 20, "", config.accentColor, function(new)
-    getgenv().hitboxSizeY = new; if getgenv().hitboxEnabled then applyHitboxToAll() end
-end)
-sizeYSlider.frame.Parent = hitboxContent
-
-local sizeZSlider = createSlider("Size Z", 4, 1, 20, "", config.accentColor, function(new)
-    getgenv().hitboxSizeZ = new; if getgenv().hitboxEnabled then applyHitboxToAll() end
-end)
-sizeZSlider.frame.Parent = hitboxContent
-
-local opacitySlider = createSlider("Opacity", 0.9, 0, 1, "", config.accentColor, function(new)
-    getgenv().hitboxTransparency = new; if getgenv().hitboxEnabled then applyHitboxToAll() end
-end)
-opacitySlider.frame.Parent = hitboxContent
-
-local autoRefreshToggle = createToggle("Auto Refresh", false, config.accentColor, function(new)
-    getgenv().hitboxRefreshEnabled = new
-end)
-autoRefreshToggle.frame.Parent = hitboxContent
-
-local intervalSlider = createSlider("Interval (s)", 5, 0.1, 15, "s", config.accentColor, function(new)
-    getgenv().hitboxRefreshInterval = new
-end)
-intervalSlider.frame.Parent = hitboxContent
-
--- ==================== CONTENIDO CONFIGURACIÓN ====================
-local configContent = Instance.new("Frame")
-configContent.Size = UDim2.new(1, 0, 1, 0)
-configContent.BackgroundTransparency = 1
-configContent.Parent = contentScroller
-configContent.Visible = false
-configContent.ZIndex = 5
-
-local configLayout = Instance.new("UIListLayout")
-configLayout.Padding = UDim.new(0, 15)
-configLayout.SortOrder = Enum.SortOrder.LayoutOrder
-configLayout.Parent = configContent
-
--- Tecla para abrir/cerrar GUI
-local toggleKeyBtn = createKeybindButton("Toggle GUI key", "Right Control", config.toggleKey)
-toggleKeyBtn.frame.Parent = configContent
-toggleKeyBtn.button.MouseButton1Click:Connect(function()
-    isSelectingKey = true
-    toggleKeyBtn.button.Text = "Press a key..."
-    TweenService:Create(toggleKeyBtn.button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 150, 0)}):Play()
-end)
-
--- Temas de color
-local themeLabel = Instance.new("TextLabel")
-themeLabel.Size = UDim2.new(1, 0, 0, 30)
-themeLabel.BackgroundTransparency = 1
-themeLabel.Text = "Color theme"
-themeLabel.TextColor3 = Color3.fromRGB(240, 240, 255)
-themeLabel.Font = Enum.Font.Gotham
-themeLabel.TextSize = 16
-themeLabel.TextXAlignment = Enum.TextXAlignment.Left
-themeLabel.Parent = configContent
-
-local themes = {
-    {name = "Blue Neon", primary = Color3.fromRGB(0, 180, 255), accent = Color3.fromRGB(255, 80, 200)},
-    {name = "Green Neon", primary = Color3.fromRGB(0, 255, 100), accent = Color3.fromRGB(255, 200, 0)},
-    {name = "Red Neon", primary = Color3.fromRGB(255, 50, 50), accent = Color3.fromRGB(255, 200, 50)},
-    {name = "Purple", primary = Color3.fromRGB(150, 0, 255), accent = Color3.fromRGB(255, 100, 255)},
-}
-
-local themeButtons = {}
-for i, theme in ipairs(themes) do
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 100, 0, 40)
-    btn.Position = UDim2.new(0, (i-1)*110, 0, 0)
-    btn.BackgroundColor3 = theme.primary
-    btn.Text = theme.name
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 14
-    btn.Parent = configContent
-    btn.ZIndex = 6
-
-    local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 8)
-    btnCorner.Parent = btn
-
-    btn.MouseButton1Click:Connect(function()
-        config.themeColor = theme.primary
-        config.accentColor = theme.accent
-        -- Actualizar UI
-        titleGradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, config.themeColor),
-            ColorSequenceKeypoint.new(1, config.accentColor)
-        })
-        contentScroller.ScrollBarImageColor3 = config.themeColor
-        if activeTab == "trigger" then
-            activeIndicator.BackgroundColor3 = config.themeColor
-            indicatorGlow.ImageColor3 = config.themeColor
-        elseif activeTab == "hitbox" then
-            activeIndicator.BackgroundColor3 = config.accentColor
-            indicatorGlow.ImageColor3 = config.accentColor
+    update()
+    local conn
+    conn = UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and draggingSizeY then
+            update()
         end
-        showNotification("Theme", "Changed to " .. theme.name, 2, "info")
     end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and draggingSizeY then
+            draggingSizeY = false
+            conn:Disconnect()
+        end
+    end)
+end)
+
+local sizeZSlider = createSlider("Size Z", 4, 1, 20, "", Color3.fromRGB(255, 70, 200))
+local draggingSizeZ = false
+sizeZSlider.button.MouseButton1Down:Connect(function(input)
+    draggingSizeZ = true
+    local function update()
+        local percent = (UserInputService:GetMouseLocation().X - sizeZSlider.button.AbsolutePosition.X) / sizeZSlider.button.AbsoluteSize.X
+        percent = math.clamp(percent, 0, 1)
+        sizeZSlider.sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+        local val = math.floor(percent * 19) + 1
+        getgenv().hitboxSizeZ = val
+        sizeZSlider.valueLabel.Text = val
+        if getgenv().hitboxEnabled then
+            applyHitboxToAll()
+        end
+    end
+    update()
+    local conn
+    conn = UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and draggingSizeZ then
+            update()
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and draggingSizeZ then
+            draggingSizeZ = false
+            conn:Disconnect()
+        end
+    end)
+end)
+
+-- Slider for opacity
+local opacitySlider = createSlider("Opacity", 0.9, 0, 1, "", Color3.fromRGB(255, 70, 200))
+opacitySlider.valueLabel.Text = "0.9"
+local draggingOpacity = false
+opacitySlider.button.MouseButton1Down:Connect(function(input)
+    draggingOpacity = true
+    local function update()
+        local percent = (UserInputService:GetMouseLocation().X - opacitySlider.button.AbsolutePosition.X) / opacitySlider.button.AbsoluteSize.X
+        percent = math.clamp(percent, 0, 1)
+        opacitySlider.sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+        local val = percent  -- 0 - 1
+        getgenv().hitboxTransparency = val
+        opacitySlider.valueLabel.Text = string.format("%.2f", val)
+        if getgenv().hitboxEnabled then
+            applyHitboxToAll()
+        end
+    end
+    update()
+    local conn
+    conn = UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and draggingOpacity then
+            update()
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and draggingOpacity then
+            draggingOpacity = false
+            conn:Disconnect()
+        end
+    end)
+end)
+
+-- Slider for refresh interval
+local intervalSlider = createSlider("Refresh Interval (s)", 5, 0.1, 15, "s", Color3.fromRGB(255, 70, 200))
+intervalSlider.valueLabel.Text = "5.0s"
+local draggingInterval = false
+intervalSlider.button.MouseButton1Down:Connect(function(input)
+    draggingInterval = true
+    local function update()
+        local percent = (UserInputService:GetMouseLocation().X - intervalSlider.button.AbsolutePosition.X) / intervalSlider.button.AbsoluteSize.X
+        percent = math.clamp(percent, 0, 1)
+        intervalSlider.sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+        local val = 0.1 + percent * 14.9  -- range 0.1 - 15
+        getgenv().hitboxRefreshInterval = val
+        intervalSlider.valueLabel.Text = string.format("%.1fs", val)
+    end
+    update()
+    local conn
+    conn = UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and draggingInterval then
+            update()
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and draggingInterval then
+            draggingInterval = false
+            conn:Disconnect()
+        end
+    end)
+end)
+
+-- ==================== NOTIFICACIONES ====================
+local function showNotification(title, message, duration, type)
+    duration = duration or notificationDuration
+    
+    local notif = Instance.new("Frame")
+    notif.Size = UDim2.new(0, 320, 0, 70)
+    notif.Position = UDim2.new(1, -340, 0, 20 + (#currentNotifications * 80))
+    notif.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    notif.Parent = gui
+    notif.ZIndex = 100
+    notif.ClipsDescendants = true
+    
+    local notifCorner = Instance.new("UICorner")
+    notifCorner.CornerRadius = UDim.new(0, 12)
+    notifCorner.Parent = notif
+    
+    local notifBorder = Instance.new("Frame")
+    notifBorder.Size = UDim2.new(1, 0, 1, 0)
+    notifBorder.BackgroundTransparency = 1
+    notifBorder.BorderSizePixel = 3
+    notifBorder.BorderColor3 = type == "success" and Color3.fromRGB(0, 255, 0) or 
+                              type == "error" and Color3.fromRGB(255, 0, 0) or 
+                              Color3.fromRGB(0, 150, 255)
+    notifBorder.Parent = notif
+    notifBorder.ZIndex = 101
+    
+    local notifBorderCorner = Instance.new("UICorner")
+    notifBorderCorner.CornerRadius = UDim.new(0, 12)
+    notifBorderCorner.Parent = notifBorder
+    
+    local notifIcon = Instance.new("TextLabel")
+    notifIcon.Size = UDim2.new(0, 30, 1, 0)
+    notifIcon.Position = UDim2.new(0, 10, 0, 0)
+    notifIcon.BackgroundTransparency = 1
+    notifIcon.Text = type == "success" and "✅" or type == "error" and "❌" or "ℹ️"
+    notifIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+    notifIcon.Font = Enum.Font.GothamBold
+    notifIcon.TextSize = 24
+    notifIcon.Parent = notif
+    notifIcon.ZIndex = 101
+    
+    local notifTitle = Instance.new("TextLabel")
+    notifTitle.Size = UDim2.new(1, -50, 0, 25)
+    notifTitle.Position = UDim2.new(0, 45, 0, 10)
+    notifTitle.BackgroundTransparency = 1
+    notifTitle.Text = title
+    notifTitle.TextColor3 = type == "success" and Color3.fromRGB(0, 255, 0) or 
+                           type == "error" and Color3.fromRGB(255, 0, 0) or 
+                           Color3.fromRGB(0, 150, 255)
+    notifTitle.Font = Enum.Font.GothamBold
+    notifTitle.TextSize = 16
+    notifTitle.TextXAlignment = Enum.TextXAlignment.Left
+    notifTitle.Parent = notif
+    notifTitle.ZIndex = 101
+    
+    local notifMessage = Instance.new("TextLabel")
+    notifMessage.Size = UDim2.new(1, -50, 0, 30)
+    notifMessage.Position = UDim2.new(0, 45, 0, 30)
+    notifMessage.BackgroundTransparency = 1
+    notifMessage.Text = message
+    notifMessage.TextColor3 = Color3.fromRGB(255, 255, 255)
+    notifMessage.Font = Enum.Font.GothamBlack
+    notifMessage.TextSize = 13
+    notifMessage.TextXAlignment = Enum.TextXAlignment.Left
+    notifMessage.TextWrapped = true
+    notifMessage.Parent = notif
+    notifMessage.ZIndex = 101
+    
+    table.insert(currentNotifications, notif)
+    
+    notif.Position = UDim2.new(1, 0, 0, 20 + ((#currentNotifications-1) * 80))
+    notif.Rotation = -5
+    TweenService:Create(notif, TweenInfo.new(0.6, Enum.EasingStyle.Back), {
+        Position = UDim2.new(1, -340, 0, 20 + ((#currentNotifications-1) * 80)),
+        Rotation = 0
+    }):Play()
+    
+    task.wait(duration)
+    
+    TweenService:Create(notif, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+        Position = UDim2.new(1, 0, 0, 20 + ((#currentNotifications-1) * 80)),
+        Rotation = 5
+    }):Play()
+    
+    task.wait(0.5)
+    notif:Destroy()
+    
+    for i, n in ipairs(currentNotifications) do
+        if n == notif then
+            table.remove(currentNotifications, i)
+            break
+        end
+    end
+    
+    for i, n in ipairs(currentNotifications) do
+        TweenService:Create(n, TweenInfo.new(0.3), {
+            Position = UDim2.new(1, -340, 0, 20 + ((i-1) * 80))
+        }):Play()
+    end
 end
 
--- Separador
-local separator = Instance.new("Frame")
-separator.Size = UDim2.new(1, 0, 0, 2)
-separator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-separator.BackgroundTransparency = 0.8
-separator.Parent = configContent
-separator.LayoutOrder = 10
+-- Eventos de los checkboxes (Trigger Bot) - CON RESPUESTA INSTANTÁNEA
+enableTrigger.checkbox.MouseButton1Down:Connect(function()
+    local newState = not enableTrigger.value
+    enableTrigger.checkbox.BackgroundColor3 = newState and enableTrigger.accentColor or Color3.fromRGB(45, 45, 50)
+    enableTrigger.checkGlow.BorderColor3 = newState and enableTrigger.accentColor or Color3.fromRGB(80, 80, 100)
+    enableTrigger.checkMark.Text = newState and "✓" or ""
+end)
 
--- (Opcional: más configuraciones)
+enableTrigger.checkbox.MouseButton1Click:Connect(function()
+    enabled = not enabled
+    enableTrigger.value = enabled
+    -- Aseguramos que los colores coincidan (por si el clic fue muy rápido y no se ejecutó el Down)
+    enableTrigger.checkbox.BackgroundColor3 = enabled and enableTrigger.accentColor or Color3.fromRGB(45, 45, 50)
+    enableTrigger.checkGlow.BorderColor3 = enabled and enableTrigger.accentColor or Color3.fromRGB(80, 80, 100)
+    enableTrigger.checkMark.Text = enabled and "✓" or ""
+end)
 
--- ==================== FUNCIONALIDAD DE PESTAÑAS ====================
-local function setActiveTab(tab)
-    activeTab = tab
-    if tab == "trigger" then
-        TweenService:Create(activeIndicator, TweenInfo.new(0.3), {Position = UDim2.new(0, 0, 0, 30), BackgroundColor3 = config.themeColor}):Play()
-        TweenService:Create(indicatorGlow, TweenInfo.new(0.3), {ImageColor3 = config.themeColor}):Play()
-        triggerIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
-        triggerText.TextColor3 = Color3.fromRGB(255, 255, 255)
-        hitboxIcon.ImageColor3 = Color3.fromRGB(200, 200, 200)
-        hitboxText.TextColor3 = Color3.fromRGB(200, 200, 200)
-        configIcon.ImageColor3 = Color3.fromRGB(200, 200, 200)
-        configText.TextColor3 = Color3.fromRGB(200, 200, 200)
-        triggerContent.Visible = true
-        hitboxContent.Visible = false
-        configContent.Visible = false
-    elseif tab == "hitbox" then
-        TweenService:Create(activeIndicator, TweenInfo.new(0.3), {Position = UDim2.new(0, 0, 0, 120), BackgroundColor3 = config.accentColor}):Play()
-        TweenService:Create(indicatorGlow, TweenInfo.new(0.3), {ImageColor3 = config.accentColor}):Play()
-        hitboxIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
-        hitboxText.TextColor3 = Color3.fromRGB(255, 255, 255)
-        triggerIcon.ImageColor3 = Color3.fromRGB(200, 200, 200)
-        triggerText.TextColor3 = Color3.fromRGB(200, 200, 200)
-        configIcon.ImageColor3 = Color3.fromRGB(200, 200, 200)
-        configText.TextColor3 = Color3.fromRGB(200, 200, 200)
-        triggerContent.Visible = false
-        hitboxContent.Visible = true
-        configContent.Visible = false
+knifeCheckbox.checkbox.MouseButton1Down:Connect(function()
+    local newState = not knifeCheckbox.value
+    knifeCheckbox.checkbox.BackgroundColor3 = newState and knifeCheckbox.accentColor or Color3.fromRGB(45, 45, 50)
+    knifeCheckbox.checkGlow.BorderColor3 = newState and knifeCheckbox.accentColor or Color3.fromRGB(80, 80, 100)
+    knifeCheckbox.checkMark.Text = newState and "✓" or ""
+end)
+
+knifeCheckbox.checkbox.MouseButton1Click:Connect(function()
+    knifeCheck = not knifeCheck
+    knifeCheckbox.value = knifeCheck
+    knifeCheckbox.checkbox.BackgroundColor3 = knifeCheck and knifeCheckbox.accentColor or Color3.fromRGB(45, 45, 50)
+    knifeCheckbox.checkGlow.BorderColor3 = knifeCheck and knifeCheckbox.accentColor or Color3.fromRGB(80, 80, 100)
+    knifeCheckbox.checkMark.Text = knifeCheck and "✓" or ""
+end)
+
+forceFieldCheckbox.checkbox.MouseButton1Down:Connect(function()
+    local newState = not forceFieldCheckbox.value
+    forceFieldCheckbox.checkbox.BackgroundColor3 = newState and forceFieldCheckbox.accentColor or Color3.fromRGB(45, 45, 50)
+    forceFieldCheckbox.checkGlow.BorderColor3 = newState and forceFieldCheckbox.accentColor or Color3.fromRGB(80, 80, 100)
+    forceFieldCheckbox.checkMark.Text = newState and "✓" or ""
+end)
+
+forceFieldCheckbox.checkbox.MouseButton1Click:Connect(function()
+    forceFieldCheck = not forceFieldCheck
+    forceFieldCheckbox.value = forceFieldCheck
+    forceFieldCheckbox.checkbox.BackgroundColor3 = forceFieldCheck and forceFieldCheckbox.accentColor or Color3.fromRGB(45, 45, 50)
+    forceFieldCheckbox.checkGlow.BorderColor3 = forceFieldCheck and forceFieldCheckbox.accentColor or Color3.fromRGB(80, 80, 100)
+    forceFieldCheckbox.checkMark.Text = forceFieldCheck and "✓" or ""
+end)
+
+-- Eventos para hitbox checkboxes
+enableHitbox.checkbox.MouseButton1Down:Connect(function()
+    local newState = not enableHitbox.value
+    enableHitbox.checkbox.BackgroundColor3 = newState and enableHitbox.accentColor or Color3.fromRGB(45, 45, 50)
+    enableHitbox.checkGlow.BorderColor3 = newState and enableHitbox.accentColor or Color3.fromRGB(80, 80, 100)
+    enableHitbox.checkMark.Text = newState and "✓" or ""
+end)
+
+enableHitbox.checkbox.MouseButton1Click:Connect(function()
+    getgenv().hitboxEnabled = not getgenv().hitboxEnabled
+    enableHitbox.value = getgenv().hitboxEnabled
+    enableHitbox.checkbox.BackgroundColor3 = getgenv().hitboxEnabled and enableHitbox.accentColor or Color3.fromRGB(45, 45, 50)
+    enableHitbox.checkGlow.BorderColor3 = getgenv().hitboxEnabled and enableHitbox.accentColor or Color3.fromRGB(80, 80, 100)
+    enableHitbox.checkMark.Text = getgenv().hitboxEnabled and "✓" or ""
+    
+    if getgenv().hitboxEnabled then
+        applyHitboxToAll()
+        showNotification("Hitbox", "🟢 ENABLED", 2, "success")
     else
-        TweenService:Create(activeIndicator, TweenInfo.new(0.3), {Position = UDim2.new(0, 0, 0, 210), BackgroundColor3 = Color3.fromRGB(150, 150, 150)}):Play()
-        TweenService:Create(indicatorGlow, TweenInfo.new(0.3), {ImageColor3 = Color3.fromRGB(150, 150, 150)}):Play()
-        configIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
-        configText.TextColor3 = Color3.fromRGB(255, 255, 255)
-        triggerIcon.ImageColor3 = Color3.fromRGB(200, 200, 200)
-        triggerText.TextColor3 = Color3.fromRGB(200, 200, 200)
-        hitboxIcon.ImageColor3 = Color3.fromRGB(200, 200, 200)
-        hitboxText.TextColor3 = Color3.fromRGB(200, 200, 200)
-        triggerContent.Visible = false
-        hitboxContent.Visible = false
-        configContent.Visible = true
+        restoreAllOriginal()
+        showNotification("Hitbox", "🔴 DISABLED", 2, "error")
     end
-end
-
-triggerBtn.MouseButton1Click:Connect(function() setActiveTab("trigger") end)
-hitboxBtn.MouseButton1Click:Connect(function() setActiveTab("hitbox") end)
-configBtn.MouseButton1Click:Connect(function() setActiveTab("config") end)
-
--- ==================== MODO SELECTOR ====================
-modeSelector.holdBtn.MouseButton1Click:Connect(function()
-    holdMode = true
-    TweenService:Create(modeSelector.holdBtn, TweenInfo.new(0.3), {BackgroundColor3 = config.themeColor, BackgroundTransparency = 0.2}):Play()
-    TweenService:Create(modeSelector.toggleBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(45, 45, 50), BackgroundTransparency = 0.3}):Play()
-    modeSelector.holdBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    modeSelector.toggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
 end)
 
-modeSelector.toggleBtn.MouseButton1Click:Connect(function()
-    holdMode = false
-    TweenService:Create(modeSelector.toggleBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(255, 150, 0), BackgroundTransparency = 0.2}):Play()
-    TweenService:Create(modeSelector.holdBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(45, 45, 50), BackgroundTransparency = 0.3}):Play()
-    modeSelector.toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    modeSelector.holdBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+teamcheckHitbox.checkbox.MouseButton1Down:Connect(function()
+    local newState = not teamcheckHitbox.value
+    teamcheckHitbox.checkbox.BackgroundColor3 = newState and teamcheckHitbox.accentColor or Color3.fromRGB(45, 45, 50)
+    teamcheckHitbox.checkGlow.BorderColor3 = newState and teamcheckHitbox.accentColor or Color3.fromRGB(80, 80, 100)
+    teamcheckHitbox.checkMark.Text = newState and "✓" or ""
 end)
 
--- ==================== SELECCIÓN DE TECLA (para keybinds) ====================
-keybindBtn.button.MouseButton1Click:Connect(function()
+teamcheckHitbox.checkbox.MouseButton1Click:Connect(function()
+    getgenv().hitboxTeamcheck = not getgenv().hitboxTeamcheck
+    teamcheckHitbox.value = getgenv().hitboxTeamcheck
+    teamcheckHitbox.checkbox.BackgroundColor3 = getgenv().hitboxTeamcheck and teamcheckHitbox.accentColor or Color3.fromRGB(45, 45, 50)
+    teamcheckHitbox.checkGlow.BorderColor3 = getgenv().hitboxTeamcheck and teamcheckHitbox.accentColor or Color3.fromRGB(80, 80, 100)
+    teamcheckHitbox.checkMark.Text = getgenv().hitboxTeamcheck and "✓" or ""
+    
+    if getgenv().hitboxEnabled then
+        restoreAllOriginal()
+        applyHitboxToAll()
+    end
+end)
+
+refreshCheck.checkbox.MouseButton1Down:Connect(function()
+    local newState = not refreshCheck.value
+    refreshCheck.checkbox.BackgroundColor3 = newState and refreshCheck.accentColor or Color3.fromRGB(45, 45, 50)
+    refreshCheck.checkGlow.BorderColor3 = newState and refreshCheck.accentColor or Color3.fromRGB(80, 80, 100)
+    refreshCheck.checkMark.Text = newState and "✓" or ""
+end)
+
+refreshCheck.checkbox.MouseButton1Click:Connect(function()
+    getgenv().hitboxRefreshEnabled = not getgenv().hitboxRefreshEnabled
+    refreshCheck.value = getgenv().hitboxRefreshEnabled
+    refreshCheck.checkbox.BackgroundColor3 = getgenv().hitboxRefreshEnabled and refreshCheck.accentColor or Color3.fromRGB(45, 45, 50)
+    refreshCheck.checkGlow.BorderColor3 = getgenv().hitboxRefreshEnabled and refreshCheck.accentColor or Color3.fromRGB(80, 80, 100)
+    refreshCheck.checkMark.Text = getgenv().hitboxRefreshEnabled and "✓" or ""
+    
+    showNotification("Auto Refresh", getgenv().hitboxRefreshEnabled and "✅ Enabled" or "❌ Disabled", 2, "info")
+end)
+
+modeBtn.MouseButton1Click:Connect(function()
+    holdMode = not holdMode
+    modeBtn.Text = holdMode and "HOLD" or "TOGGLE"
+    
+    TweenService:Create(modeBtn, TweenInfo.new(0.3), {
+        BackgroundColor3 = holdMode and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(255, 150, 0)
+    }):Play()
+end)
+
+keySelectBtn.MouseButton1Click:Connect(function()
     isSelectingKey = true
-    keybindBtn.button.Text = "Press a key..."
-    TweenService:Create(keybindBtn.button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 150, 0), BackgroundTransparency = 0.1}):Play()
+    
+    TweenService:Create(keySelectBtn, TweenInfo.new(0.2), {
+        BackgroundColor3 = Color3.fromRGB(255, 150, 0),
+        Size = UDim2.new(0.48, 5, 0, 47)
+    }):Play()
+    TweenService:Create(keyGlow, TweenInfo.new(0.2), {Visible = true}):Play()
+    
+    keySelectBtn.Text = "PRESS KEY"
 end)
 
--- Manejo de selección de teclas
 UserInputService.InputBegan:Connect(function(input)
     if isSelectingKey then
         if input.UserInputType == Enum.UserInputType.Keyboard then
             holdKey = input.KeyCode
-            keybindBtn.button.Text = input.KeyCode.Name
+            keySelectBtn.Text = "⌨️ " .. input.KeyCode.Name
         elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
             holdKey = Enum.UserInputType.MouseButton1
-            keybindBtn.button.Text = "Left Click"
+            keySelectBtn.Text = "🖱️ LEFT CLICK"
         elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
             holdKey = Enum.UserInputType.MouseButton2
-            keybindBtn.button.Text = "Right Click"
+            keySelectBtn.Text = "🖱️ RIGHT CLICK"
         elseif input.UserInputType == Enum.UserInputType.MouseButton3 then
             holdKey = Enum.UserInputType.MouseButton3
-            keybindBtn.button.Text = "Middle Click"
+            keySelectBtn.Text = "🖱️ MIDDLE CLICK"
         end
-        TweenService:Create(keybindBtn.button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 45, 50), BackgroundTransparency = 0.3}):Play()
+        
+        TweenService:Create(keySelectBtn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(45, 45, 50),
+            Size = UDim2.new(0.48, 0, 0, 45)
+        }):Play()
+        TweenService:Create(keyGlow, TweenInfo.new(0.2), {Visible = false}):Play()
+        
         isSelectingKey = false
     end
 end)
 
--- Selección de tecla de toggle
-toggleKeyBtn.button.MouseButton1Click:Connect(function()
-    isSelectingKey = true
-    toggleKeyBtn.button.Text = "Press a key..."
-    TweenService:Create(toggleKeyBtn.button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 150, 0)}):Play()
-    -- Usamos la misma variable isSelectingKey, pero diferenciamos por contexto
-    -- Aquí necesitamos un manejador específico, lo haremos en InputBegan
+-- Sliders dragging (Triggerbot)
+local draggingPrecision = false
+local draggingDelay = false
+local draggingDistance = false
+
+precisionSlider.button.MouseButton1Down:Connect(function(input)
+    draggingPrecision = true
+    local mouseX = input.Position.X
+    local bgPos = precisionSlider.button.AbsolutePosition.X
+    local bgSize = precisionSlider.button.AbsoluteSize.X
+    local percent = (mouseX - bgPos) / bgSize
+    percent = math.clamp(percent, 0, 1)
+    
+    TweenService:Create(precisionSlider.sliderFill, TweenInfo.new(0.1), {Size = UDim2.new(percent, 0, 1, 0)}):Play()
+    precision = math.floor(percent * 100)
+    precisionSlider.valueLabel.Text = precision .. "%"
 end)
 
--- Ajustamos InputBegan para manejar también toggleKey
-UserInputService.InputBegan:Connect(function(input)
-    if isSelectingKey then
-        -- Primero determinamos qué botón está siendo seleccionado
-        if keybindBtn.button.BackgroundColor3 == Color3.fromRGB(255, 150, 0) then
-            -- Es para holdKey
-            if input.UserInputType == Enum.UserInputType.Keyboard then
-                holdKey = input.KeyCode
-                keybindBtn.button.Text = input.KeyCode.Name
-            elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-                holdKey = Enum.UserInputType.MouseButton1
-                keybindBtn.button.Text = "Left Click"
-            elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-                holdKey = Enum.UserInputType.MouseButton2
-                keybindBtn.button.Text = "Right Click"
-            elseif input.UserInputType == Enum.UserInputType.MouseButton3 then
-                holdKey = Enum.UserInputType.MouseButton3
-                keybindBtn.button.Text = "Middle Click"
-            end
-            TweenService:Create(keybindBtn.button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 45, 50), BackgroundTransparency = 0.3}):Play()
-        elseif toggleKeyBtn.button.BackgroundColor3 == Color3.fromRGB(255, 150, 0) then
-            -- Es para toggleKey
-            if input.UserInputType == Enum.UserInputType.Keyboard then
-                config.toggleKey = input.KeyCode
-                toggleKeyBtn.button.Text = input.KeyCode.Name
-            end
-            TweenService:Create(toggleKeyBtn.button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 45, 50), BackgroundTransparency = 0.3}):Play()
+delaySlider.button.MouseButton1Down:Connect(function(input)
+    draggingDelay = true
+    local mouseX = input.Position.X
+    local bgPos = delaySlider.button.AbsolutePosition.X
+    local bgSize = delaySlider.button.AbsoluteSize.X
+    local percent = (mouseX - bgPos) / bgSize
+    percent = math.clamp(percent, 0, 1)
+    
+    TweenService:Create(delaySlider.sliderFill, TweenInfo.new(0.1), {Size = UDim2.new(percent, 0, 1, 0)}):Play()
+    triggerDelay = math.floor(percent * 100)
+    delaySlider.valueLabel.Text = triggerDelay .. "ms"
+end)
+
+distanceSlider.button.MouseButton1Down:Connect(function(input)
+    draggingDistance = true
+    local mouseX = input.Position.X
+    local bgPos = distanceSlider.button.AbsolutePosition.X
+    local bgSize = distanceSlider.button.AbsoluteSize.X
+    local percent = (mouseX - bgPos) / bgSize
+    percent = math.clamp(percent, 0, 1)
+    
+    TweenService:Create(distanceSlider.sliderFill, TweenInfo.new(0.1), {Size = UDim2.new(percent, 0, 1, 0)}):Play()
+    maxDistance = math.floor(percent * 5000)
+    distanceSlider.valueLabel.Text = maxDistance
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        local mousePos = UserInputService:GetMouseLocation()
+        
+        if draggingPrecision then
+            local bgPos = precisionSlider.button.AbsolutePosition.X
+            local bgSize = precisionSlider.button.AbsoluteSize.X
+            local percent = (mousePos.X - bgPos) / bgSize
+            percent = math.clamp(percent, 0, 1)
+            precisionSlider.sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+            precision = math.floor(percent * 100)
+            precisionSlider.valueLabel.Text = precision .. "%"
         end
-        isSelectingKey = false
+        
+        if draggingDelay then
+            local bgPos = delaySlider.button.AbsolutePosition.X
+            local bgSize = delaySlider.button.AbsoluteSize.X
+            local percent = (mousePos.X - bgPos) / bgSize
+            percent = math.clamp(percent, 0, 1)
+            delaySlider.sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+            triggerDelay = math.floor(percent * 100)
+            delaySlider.valueLabel.Text = triggerDelay .. "ms"
+        end
+        
+        if draggingDistance then
+            local bgPos = distanceSlider.button.AbsolutePosition.X
+            local bgSize = distanceSlider.button.AbsoluteSize.X
+            local percent = (mousePos.X - bgPos) / bgSize
+            percent = math.clamp(percent, 0, 1)
+            distanceSlider.sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+            maxDistance = math.floor(percent * 5000)
+            distanceSlider.valueLabel.Text = maxDistance
+        end
     end
 end)
 
--- ==================== CONTROLES DE VENTANA ====================
-minimizeBtn.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    if minimized then
-        TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
-            Size = UDim2.new(0, 500, 0, 60),
-            Position = UDim2.new(0.5, -250, 1, -80)
-        }):Play()
-        contentContainer.Visible = false
-        sidebar.Visible = false
-        minimizeBtn.Text = "□"
-    else
-        TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
-            Size = UDim2.new(0, 500, 0, 680),
-            Position = UDim2.new(0.5, -250, 0.5, -340)
-        }):Play()
-        contentContainer.Visible = true
-        sidebar.Visible = true
-        minimizeBtn.Text = "−"
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if draggingPrecision then
+            draggingPrecision = false
+        end
+        if draggingDelay then
+            draggingDelay = false
+        end
+        if draggingDistance then
+            draggingDistance = false
+        end
     end
 end)
 
-closeBtn.MouseButton1Click:Connect(function()
-    TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
-        Size = UDim2.new(0, 0, 0, 0),
-        BackgroundTransparency = 1
-    }):Play()
-    task.wait(0.4)
-    gui:Destroy()
-    enabled = false
-end)
+-- Visibilidad con Ctrl derecho
+local function isCtrlKey(input)
+    return input.KeyCode == Enum.KeyCode.RightControl
+end
 
--- Atajo configurable
 UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == config.toggleKey and not isSelectingKey then
+    if input.UserInputType == Enum.UserInputType.Keyboard and isCtrlKey(input) and not isSelectingKey then
         guiVisible = not guiVisible
+        
         if guiVisible then
             main.Visible = true
-            TweenService:Create(main, TweenInfo.new(0.5, Enum.EasingStyle.Back), {
-                Size = UDim2.new(0, 500, 0, minimized and 60 or 680),
-                BackgroundTransparency = 0.15
+            TweenService:Create(main, TweenInfo.new(0.6, Enum.EasingStyle.Back), {
+                Size = UDim2.new(0, 500, 0, 680),
+                BackgroundTransparency = 0,
             }):Play()
+            showNotification("GUI", "🟢 OPEN INTERFACE", 2, "success")
         else
-            TweenService:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Exponential), {
+            TweenService:Create(main, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
                 Size = UDim2.new(0, 0, 0, 0),
-                BackgroundTransparency = 1
+                BackgroundTransparency = 1,
             }):Play()
             task.wait(0.3)
             main.Visible = false
         end
+        return
     end
+end)
+
+minimizeBtn.MouseButton1Click:Connect(function()
+    guiVisible = false
+    
+    TweenService:Create(main, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+        Size = UDim2.new(0, 0, 0, 0),
+        BackgroundTransparency = 1,
+    }):Play()
+    
+    task.wait(0.3)
+    main.Visible = false
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    TweenService:Create(main, TweenInfo.new(0.5, Enum.EasingStyle.Exponential), {
+        Size = UDim2.new(0, 0, 0, 0),
+        BackgroundTransparency = 1,
+    }):Play()
+    
+    task.wait(0.5)
+    gui:Destroy()
+    enabled = false
 end)
 
 -- Animación de entrada
 main.Size = UDim2.new(0, 0, 0, 0)
 main.BackgroundTransparency = 1
 main.Visible = true
+
 task.wait(0.1)
 TweenService:Create(main, TweenInfo.new(0.8, Enum.EasingStyle.Back), {
     Size = UDim2.new(0, 500, 0, 680),
-    BackgroundTransparency = 0.15
+    BackgroundTransparency = 0
 }):Play()
 
-showNotification("FAME CHEATS", "Configurable Edition", 3, "info")
-showNotification("CONTROLES", "Key customizable", 3, "info")
-
--- ==================== LÓGICA DEL TRIGGERBOT ====================
+-- Funciones auxiliares para el triggerbot
 local function isKeyPressed(input)
     if typeof(holdKey) == "EnumItem" then
         if holdKey.EnumType == Enum.UserInputType then
@@ -1176,8 +1338,14 @@ UserInputService.InputBegan:Connect(function(input)
         if enabled then
             if holdMode then
                 triggerActive = true
+                TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.2), {
+                    BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+                }):Play()
             else
                 triggerActive = not triggerActive
+                TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.2), {
+                    BackgroundColor3 = triggerActive and Color3.fromRGB(0, 200, 255) or enableTrigger.accentColor
+                }):Play()
             end
         end
     end
@@ -1188,6 +1356,9 @@ UserInputService.InputEnded:Connect(function(input)
         keyPressed = false
         if enabled and holdMode then
             triggerActive = false
+            TweenService:Create(enableTrigger.checkbox, TweenInfo.new(0.2), {
+                BackgroundColor3 = enableTrigger.accentColor
+            }):Play()
         end
     end
 end)
@@ -1217,33 +1388,41 @@ end
 
 local function getTarget()
     if not mouse.Target then return nil end
+
     local target = mouse.Target
     local model = target:FindFirstAncestorOfClass("Model")
     if not model then return nil end
+
     local plr = Players:GetPlayerFromCharacter(model)
     if not plr or plr == player then return nil end
+
     local hum = model:FindFirstChildOfClass("Humanoid")
     if not hum or hum.Health <= 0 then return nil end
+
     local distance = getDistanceFromTarget(target)
     if distance > maxDistance then return nil end
+
     return target
 end
 
 local function shoot()
     local success = pcall(mouse1click)
     if success then return end
+
     success = pcall(function()
         VirtualInputManager:SendMouseButtonEvent(mouse.X, mouse.Y, 0, true, game, 0)
         task.wait(0.01)
         VirtualInputManager:SendMouseButtonEvent(mouse.X, mouse.Y, 0, false, game, 0)
     end)
     if success then return end
+
     success = pcall(function()
         UserInputService:SendMouseButtonEvent(mouse.X, mouse.Y, 0, true, game, 0)
         task.wait(0.01)
         UserInputService:SendMouseButtonEvent(mouse.X, mouse.Y, 0, false, game, 0)
     end)
     if success then return end
+
     local character = player.Character
     if character then
         local tool = character:FindFirstChildOfClass("Tool")
@@ -1259,6 +1438,7 @@ local function shoot()
             end
         end
     end
+
     pcall(function()
         VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
         task.wait(0.01)
@@ -1266,29 +1446,58 @@ local function shoot()
     end)
 end
 
+-- mainloop
 local lastShotTime = 0
 local mousePressed = false
 
 RunService.Heartbeat:Connect(function()
     local shouldTrigger = enabled and triggerActive
     if not shouldTrigger then
-        if mousePressed then mouse1release(); mousePressed = false end
+        if mousePressed then
+            mouse1release()
+            mousePressed = false
+        end
         return
     end
+
     local currentTime = tick()
-    if currentTime - lastShotTime < (triggerDelay / 1000) then return end
+    if currentTime - lastShotTime < (triggerDelay / 1000) then
+        return
+    end
+
     local target = getTarget()
     if target then
         if knifeCheck and hasKnifeEquipped() then
-            if mousePressed then mouse1release(); mousePressed = false end
+            if mousePressed then
+                mouse1release()
+                mousePressed = false
+            end
             return
         end
+
         if math.random(1, 100) <= precision then
             shoot()
             lastShotTime = currentTime
             mousePressed = true
         end
     else
-        if mousePressed then mouse1release(); mousePressed = false end
+        if mousePressed then
+            mouse1release()
+            mousePressed = false
+        end
     end
 end)
+
+UserInputService.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.RightControl then
+        if mousePressed then
+            mouse1release()
+            mousePressed = false
+        end
+    end
+end)
+
+-- last notif
+showNotification("TRIGGERBOT", "🚀 LOADED SUCCESSFULLY!", 3, "success")
+showNotification("CONTROLES", "CTRL TO OPEN/CLOSE", 3, "info")
+showNotification("DISCORD SERVER", "https://discord.gg/ugg6MqEQTa ", 7, "info")
