@@ -1,5 +1,5 @@
--- TRIGGERBOT + HITBOX EXPANDER (ULTRA MODERNO) - CORREGIDO
--- by FAME - Glassmorphism + Neon
+-- TRIGGERBOT + HITBOX EXPANDER
+-- by FAME - Glassmorphism 
 
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -103,7 +103,14 @@ coroutine.wrap(function()
     end
 end)()
 
--- ==================== INTERFAZ ULTRA MODERNA ====================
+-- ==================== VARIABLES DE CONFIGURACIÓN ====================
+local config = {
+    toggleKey = Enum.KeyCode.RightControl,
+    themeColor = Color3.fromRGB(0, 180, 255),
+    accentColor = Color3.fromRGB(255, 80, 200),
+}
+
+-- ==================== INTERFAZ ====================
 local gui = Instance.new("ScreenGui")
 gui.Name = "FameCheats"
 gui.Parent = game:FindFirstChild("CoreGui") or player.PlayerGui
@@ -113,11 +120,10 @@ gui.IgnoreGuiInset = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 -- Variables de estado
-local guiVisible = true
 local minimized = false
 local activeTab = "trigger"
 
--- ==================== NOTIFICACIONES GLASS (AHORA SÍ FUNCIONAN) ====================
+-- ==================== NOTIFICACIONES GLASS ====================
 local function showNotification(title, message, duration, nType)
     duration = duration or notificationDuration
 
@@ -127,11 +133,10 @@ local function showNotification(title, message, duration, nType)
     notif.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
     notif.BackgroundTransparency = 0.2
     notif.BorderSizePixel = 0
-    notif.Parent = gui   -- Ahora gui ya existe
+    notif.Parent = gui
     notif.ZIndex = 100
     notif.ClipsDescendants = true
 
-    -- Efecto glass
     local blur = Instance.new("ImageLabel")
     blur.Size = UDim2.new(1, 0, 1, 0)
     blur.BackgroundTransparency = 1
@@ -151,7 +156,7 @@ local function showNotification(title, message, duration, nType)
     notifBorder.BorderSizePixel = 2
     notifBorder.BorderColor3 = nType == "success" and Color3.fromRGB(0, 255, 0) or
                                nType == "error" and Color3.fromRGB(255, 0, 0) or
-                               Color3.fromRGB(0, 180, 255)
+                               config.themeColor
     notifBorder.Parent = notif
     notifBorder.ZIndex = 101
 
@@ -177,7 +182,7 @@ local function showNotification(title, message, duration, nType)
     notifTitle.Text = title
     notifTitle.TextColor3 = nType == "success" and Color3.fromRGB(0, 255, 0) or
                             nType == "error" and Color3.fromRGB(255, 0, 0) or
-                            Color3.fromRGB(0, 180, 255)
+                            config.themeColor
     notifTitle.Font = Enum.Font.GothamBold
     notifTitle.TextSize = 18
     notifTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -190,7 +195,7 @@ local function showNotification(title, message, duration, nType)
     notifMessage.BackgroundTransparency = 1
     notifMessage.Text = message
     notifMessage.TextColor3 = Color3.fromRGB(220, 220, 240)
-    notifMessage.Font = Enum.Font.GothamBlack
+    notifMessage.Font = Enum.Font.Gotham
     notifMessage.TextSize = 14
     notifMessage.TextXAlignment = Enum.TextXAlignment.Left
     notifMessage.TextWrapped = true
@@ -232,8 +237,8 @@ end
 
 -- ==================== VENTANA PRINCIPAL (GLASS) ====================
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 500, 0, 640)
-main.Position = UDim2.new(0.5, -250, 0.5, -320)
+main.Size = UDim2.new(0, 500, 0, 680)
+main.Position = UDim2.new(0.5, -250, 0.5, -340)
 main.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 main.BackgroundTransparency = 0.15
 main.BorderSizePixel = 0
@@ -244,7 +249,6 @@ main.ClipsDescendants = true
 main.ZIndex = 2
 main.Visible = true
 
--- Sombra exterior
 local shadow = Instance.new("ImageLabel")
 shadow.Size = UDim2.new(1, 40, 1, 40)
 shadow.Position = UDim2.new(0, -20, 0, -20)
@@ -257,12 +261,10 @@ shadow.SliceCenter = Rect.new(10, 10, 118, 118)
 shadow.Parent = main
 shadow.ZIndex = 1
 
--- Esquinas redondeadas
 local mainCorner = Instance.new("UICorner")
 mainCorner.CornerRadius = UDim.new(0, 24)
 mainCorner.Parent = main
 
--- Efecto glass (blur)
 local glassEffect = Instance.new("ImageLabel")
 glassEffect.Size = UDim2.new(1, 0, 1, 0)
 glassEffect.BackgroundTransparency = 1
@@ -285,12 +287,11 @@ local titleCorner = Instance.new("UICorner")
 titleCorner.CornerRadius = UDim.new(0, 24)
 titleCorner.Parent = titleBar
 
--- Título con gradiente
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -100, 1, 0)
 title.Position = UDim2.new(0, 20, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "FAME CHEATS"
+title.Text = "TRIGGERBOT / FAME"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 24
@@ -300,13 +301,12 @@ title.ZIndex = 5
 
 local titleGradient = Instance.new("UIGradient")
 titleGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 180, 255)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 80, 200))
+    ColorSequenceKeypoint.new(0, config.themeColor),
+    ColorSequenceKeypoint.new(1, config.accentColor)
 })
 titleGradient.Rotation = 45
 titleGradient.Parent = title
 
--- Botones de ventana
 local function createWindowButton(text, posX, color, hoverColor)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 36, 0, 36)
@@ -337,7 +337,7 @@ end
 local closeBtn = createWindowButton("✕", -50, Color3.fromRGB(255, 70, 70), Color3.fromRGB(255, 100, 100))
 local minimizeBtn = createWindowButton("−", -90, Color3.fromRGB(100, 100, 120), Color3.fromRGB(130, 130, 150))
 
--- ==================== SIDEBAR CON GRADIENTE ====================
+-- ==================== SIDEBAR CON IMÁGENES ====================
 local sidebar = Instance.new("Frame")
 sidebar.Size = UDim2.new(0, 90, 1, -60)
 sidebar.Position = UDim2.new(0, 0, 0, 60)
@@ -359,8 +359,14 @@ sidebarGradient.Color = ColorSequence.new({
 sidebarGradient.Rotation = 90
 sidebarGradient.Parent = sidebar
 
--- Botones del sidebar con iconos y texto
-local function createSidebarButton(icon, text, posY, activeColor)
+-- IDs de imagen (puedes cambiarlos)
+local iconAssets = {
+    trigger = "rbxassetid://6031075938",  -- rayo
+    hitbox = "rbxassetid://6031091654",   -- caja
+    config = "rbxassetid://6031119568",   -- engranaje
+}
+
+local function createSidebarButtonWithImage(assetId, text, posY)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 70, 0, 70)
     btn.Position = UDim2.new(0.5, -35, 0, posY)
@@ -374,16 +380,14 @@ local function createSidebarButton(icon, text, posY, activeColor)
     btnCorner.CornerRadius = UDim.new(0, 16)
     btnCorner.Parent = btn
 
-    local iconLabel = Instance.new("TextLabel")
-    iconLabel.Size = UDim2.new(1, 0, 0, 40)
-    iconLabel.Position = UDim2.new(0, 0, 0, 5)
-    iconLabel.BackgroundTransparency = 1
-    iconLabel.Text = icon
-    iconLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-    iconLabel.Font = Enum.Font.GothamBold
-    iconLabel.TextSize = 28
-    iconLabel.Parent = btn
-    iconLabel.ZIndex = 6
+    local icon = Instance.new("ImageLabel")
+    icon.Size = UDim2.new(0, 40, 0, 40)
+    icon.Position = UDim2.new(0.5, -20, 0, 5)
+    icon.BackgroundTransparency = 1
+    icon.Image = assetId
+    icon.ImageColor3 = Color3.fromRGB(200, 200, 200)
+    icon.Parent = btn
+    icon.ZIndex = 6
 
     local textLabel = Instance.new("TextLabel")
     textLabel.Size = UDim2.new(1, 0, 0, 20)
@@ -391,22 +395,22 @@ local function createSidebarButton(icon, text, posY, activeColor)
     textLabel.BackgroundTransparency = 1
     textLabel.Text = text
     textLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-    textLabel.Font = Enum.Font.GothamBlack
+    textLabel.Font = Enum.Font.Gotham
     textLabel.TextSize = 12
     textLabel.Parent = btn
     textLabel.ZIndex = 6
 
-    return btn, iconLabel, textLabel
+    return btn, icon, textLabel
 end
 
-local triggerBtn, triggerIcon, triggerText = createSidebarButton("🛠", "TRIGGER", 20, Color3.fromRGB(0, 180, 255))
-local hitboxBtn, hitboxIcon, hitboxText = createSidebarButton("⚙", "HITBOX", 110, Color3.fromRGB(255, 80, 200))
+local triggerBtn, triggerIcon, triggerText = createSidebarButtonWithImage(iconAssets.trigger, "TRIGGER", 20)
+local hitboxBtn, hitboxIcon, hitboxText = createSidebarButtonWithImage(iconAssets.hitbox, "HITBOX", 110)
+local configBtn, configIcon, configText = createSidebarButtonWithImage(iconAssets.config, "CONFIG", 200)
 
--- Indicador de pestaña activa (barra luminosa)
 local activeIndicator = Instance.new("Frame")
 activeIndicator.Size = UDim2.new(0, 4, 0, 50)
 activeIndicator.Position = UDim2.new(0, 0, 0, 30)
-activeIndicator.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
+activeIndicator.BackgroundColor3 = config.themeColor
 activeIndicator.Parent = sidebar
 activeIndicator.ZIndex = 7
 
@@ -414,13 +418,12 @@ local indicatorCorner = Instance.new("UICorner")
 indicatorCorner.CornerRadius = UDim.new(0, 4)
 indicatorCorner.Parent = activeIndicator
 
--- Efecto de brillo para el indicador
 local indicatorGlow = Instance.new("ImageLabel")
 indicatorGlow.Size = UDim2.new(1, 10, 1, 10)
 indicatorGlow.Position = UDim2.new(0, -5, 0, -5)
 indicatorGlow.BackgroundTransparency = 1
 indicatorGlow.Image = "rbxassetid://3570695787"
-indicatorGlow.ImageColor3 = Color3.fromRGB(0, 180, 255)
+indicatorGlow.ImageColor3 = config.themeColor
 indicatorGlow.ImageTransparency = 0.5
 indicatorGlow.Parent = activeIndicator
 indicatorGlow.ZIndex = 6
@@ -445,7 +448,7 @@ contentScroller.Size = UDim2.new(1, 0, 1, 0)
 contentScroller.BackgroundTransparency = 1
 contentScroller.BorderSizePixel = 0
 contentScroller.ScrollBarThickness = 6
-contentScroller.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+contentScroller.ScrollBarImageColor3 = config.themeColor
 contentScroller.CanvasSize = UDim2.new(0, 0, 0, 0)
 contentScroller.Parent = contentContainer
 contentScroller.ZIndex = 5
@@ -453,7 +456,6 @@ contentScroller.AutomaticCanvasSize = Enum.AutomaticSize.Y
 contentScroller.ElasticBehavior = Enum.ElasticBehavior.Always
 contentScroller.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
 
--- Padding elegante
 local padding = Instance.new("UIPadding")
 padding.PaddingLeft = UDim.new(0, 20)
 padding.PaddingRight = UDim.new(0, 20)
@@ -469,9 +471,7 @@ layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     contentScroller.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 40)
 end)
 
--- ==================== COMPONENTES UI MEJORADOS ====================
-
--- Toggle neon
+-- ==================== COMPONENTES UI (TOGGLES, SLIDERS, ETC) ====================
 local function createToggle(text, default, color, onChange)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 50)
@@ -484,7 +484,7 @@ local function createToggle(text, default, color, onChange)
     label.BackgroundTransparency = 1
     label.Text = text
     label.TextColor3 = Color3.fromRGB(240, 240, 255)
-    label.Font = Enum.Font.GothamBlack
+    label.Font = Enum.Font.Gotham
     label.TextSize = 16
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = frame
@@ -512,7 +512,6 @@ local function createToggle(text, default, color, onChange)
     circleCorner.CornerRadius = UDim.new(1, 0)
     circleCorner.Parent = toggleCircle
 
-    -- Efecto glow
     local glow = Instance.new("ImageLabel")
     glow.Size = UDim2.new(1, 12, 1, 12)
     glow.Position = UDim2.new(0, -6, 0, -6)
@@ -549,7 +548,6 @@ local function createToggle(text, default, color, onChange)
     return {frame = frame, setState = setState}
 end
 
--- Slider con diseño premium
 local function createSlider(text, value, min, max, suffix, color, onChange)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 70)
@@ -562,7 +560,7 @@ local function createSlider(text, value, min, max, suffix, color, onChange)
     label.BackgroundTransparency = 1
     label.Text = text
     label.TextColor3 = Color3.fromRGB(240, 240, 255)
-    label.Font = Enum.Font.GothamBlack
+    label.Font = Enum.Font.Gotham
     label.TextSize = 16
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = frame
@@ -602,7 +600,6 @@ local function createSlider(text, value, min, max, suffix, color, onChange)
     fillCorner.CornerRadius = UDim.new(1, 0)
     fillCorner.Parent = sliderFill
 
-    -- Gradiente
     local fillGradient = Instance.new("UIGradient")
     fillGradient.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, color),
@@ -611,7 +608,6 @@ local function createSlider(text, value, min, max, suffix, color, onChange)
     fillGradient.Rotation = 45
     fillGradient.Parent = sliderFill
 
-    -- Thumb (punto del slider)
     local thumb = Instance.new("Frame")
     thumb.Size = UDim2.new(0, 16, 0, 16)
     thumb.Position = UDim2.new(percent, -8, 0.5, -8)
@@ -681,7 +677,6 @@ local function createSlider(text, value, min, max, suffix, color, onChange)
     end}
 end
 
--- Selector de tecla con diseño de chip
 local function createKeybindButton(text, defaultKeyText, defaultKey)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 50)
@@ -694,7 +689,7 @@ local function createKeybindButton(text, defaultKeyText, defaultKey)
     label.BackgroundTransparency = 1
     label.Text = text
     label.TextColor3 = Color3.fromRGB(240, 240, 255)
-    label.Font = Enum.Font.GothamBlack
+    label.Font = Enum.Font.Gotham
     label.TextSize = 16
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = frame
@@ -707,7 +702,7 @@ local function createKeybindButton(text, defaultKeyText, defaultKey)
     button.BackgroundTransparency = 0.3
     button.Text = defaultKeyText
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.Font = Enum.Font.GothamBlack
+    button.Font = Enum.Font.Gotham
     button.TextSize = 14
     button.Parent = frame
     button.ZIndex = 6
@@ -716,7 +711,6 @@ local function createKeybindButton(text, defaultKeyText, defaultKey)
     btnCorner.CornerRadius = UDim.new(0, 12)
     btnCorner.Parent = button
 
-    -- Sombra del botón
     local btnShadow = Instance.new("ImageLabel")
     btnShadow.Size = UDim2.new(1, 10, 1, 10)
     btnShadow.Position = UDim2.new(0, -5, 0, -5)
@@ -732,7 +726,6 @@ local function createKeybindButton(text, defaultKeyText, defaultKey)
     return {frame = frame, button = button}
 end
 
--- Selector de modo (Hold/Toggle) con diseño de píldoras
 local function createModeSelector()
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 50)
@@ -745,7 +738,7 @@ local function createModeSelector()
     label.BackgroundTransparency = 1
     label.Text = "Mode"
     label.TextColor3 = Color3.fromRGB(240, 240, 255)
-    label.Font = Enum.Font.GothamBlack
+    label.Font = Enum.Font.Gotham
     label.TextSize = 16
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = frame
@@ -754,7 +747,7 @@ local function createModeSelector()
     local holdBtn = Instance.new("TextButton")
     holdBtn.Size = UDim2.new(0, 70, 0, 38)
     holdBtn.Position = UDim2.new(1, -140, 0.5, -19)
-    holdBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
+    holdBtn.BackgroundColor3 = config.themeColor
     holdBtn.BackgroundTransparency = 0.2
     holdBtn.Text = "HOLD"
     holdBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -770,7 +763,7 @@ local function createModeSelector()
     toggleBtn.BackgroundTransparency = 0.3
     toggleBtn.Text = "TOGGLE"
     toggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    toggleBtn.Font = Enum.Font.GothamBlack
+    toggleBtn.Font = Enum.Font.Gotham
     toggleBtn.TextSize = 14
     toggleBtn.Parent = frame
     toggleBtn.ZIndex = 6
@@ -797,10 +790,9 @@ triggerLayout.Padding = UDim.new(0, 15)
 triggerLayout.SortOrder = Enum.SortOrder.LayoutOrder
 triggerLayout.Parent = triggerContent
 
--- Elementos
-local enableToggle = createToggle("Enable Trigger Bot", false, Color3.fromRGB(0, 180, 255), function(new)
+local enableToggle = createToggle("Enable Trigger Bot", false, config.themeColor, function(new)
     enabled = new
-    showNotification("Trigger Bot", new and "Enable" or "Disable", 2, new and "success" or "error")
+    showNotification("Trigger Bot", new and "Enabled" or "Disabled", 2, new and "success" or "error")
 end)
 enableToggle.frame.Parent = triggerContent
 
@@ -810,10 +802,10 @@ keybindBtn.frame.Parent = triggerContent
 local modeSelector = createModeSelector()
 modeSelector.frame.Parent = triggerContent
 
-local knifeToggle = createToggle("Ignore knife", true, Color3.fromRGB(0, 180, 255), function(new) knifeCheck = new end)
+local knifeToggle = createToggle("Ignore knife", true, config.themeColor, function(new) knifeCheck = new end)
 knifeToggle.frame.Parent = triggerContent
 
-local forceFieldToggle = createToggle("Ignore ForceField", false, Color3.fromRGB(0, 180, 255), function(new) forceFieldCheck = new end)
+local forceFieldToggle = createToggle("Ignore ForceField", false, config.themeColor, function(new) forceFieldCheck = new end)
 forceFieldToggle.frame.Parent = triggerContent
 
 local precisionSlider = createSlider("Precision", 50, 0, 100, "%", Color3.fromRGB(0, 200, 100), function(new) precision = new end)
@@ -838,80 +830,186 @@ hitboxLayout.Padding = UDim.new(0, 15)
 hitboxLayout.SortOrder = Enum.SortOrder.LayoutOrder
 hitboxLayout.Parent = hitboxContent
 
-local enableHitboxToggle = createToggle("Enable Hitbox Expander", false, Color3.fromRGB(255, 80, 200), function(new)
+local enableHitboxToggle = createToggle("Enable Hitbox Expander", false, config.accentColor, function(new)
     getgenv().hitboxEnabled = new
     if new then applyHitboxToAll(); showNotification("Hitbox", "Enabled", 2, "success")
     else restoreAllOriginal(); showNotification("Hitbox", "Disabled", 2, "error") end
 end)
 enableHitboxToggle.frame.Parent = hitboxContent
 
-local teamcheckToggle = createToggle("Team Check (only enemies)", false, Color3.fromRGB(255, 80, 200), function(new)
+local teamcheckToggle = createToggle("Team Check (only enemies)", false, config.accentColor, function(new)
     getgenv().hitboxTeamcheck = new
     if getgenv().hitboxEnabled then restoreAllOriginal(); applyHitboxToAll() end
 end)
 teamcheckToggle.frame.Parent = hitboxContent
 
-local sizeXSlider = createSlider("Size X", 4, 1, 20, "", Color3.fromRGB(255, 80, 200), function(new)
+local sizeXSlider = createSlider("Size X", 4, 1, 20, "", config.accentColor, function(new)
     getgenv().hitboxSizeX = new; if getgenv().hitboxEnabled then applyHitboxToAll() end
 end)
 sizeXSlider.frame.Parent = hitboxContent
 
-local sizeYSlider = createSlider("Size Y", 4, 1, 20, "", Color3.fromRGB(255, 80, 200), function(new)
+local sizeYSlider = createSlider("Size Y", 4, 1, 20, "", config.accentColor, function(new)
     getgenv().hitboxSizeY = new; if getgenv().hitboxEnabled then applyHitboxToAll() end
 end)
 sizeYSlider.frame.Parent = hitboxContent
 
-local sizeZSlider = createSlider("Size Z", 4, 1, 20, "", Color3.fromRGB(255, 80, 200), function(new)
+local sizeZSlider = createSlider("Size Z", 4, 1, 20, "", config.accentColor, function(new)
     getgenv().hitboxSizeZ = new; if getgenv().hitboxEnabled then applyHitboxToAll() end
 end)
 sizeZSlider.frame.Parent = hitboxContent
 
-local opacitySlider = createSlider("Opacity", 0.9, 0, 1, "", Color3.fromRGB(255, 80, 200), function(new)
+local opacitySlider = createSlider("Opacity", 0.9, 0, 1, "", config.accentColor, function(new)
     getgenv().hitboxTransparency = new; if getgenv().hitboxEnabled then applyHitboxToAll() end
 end)
 opacitySlider.frame.Parent = hitboxContent
 
-local autoRefreshToggle = createToggle("Auto Refresh", false, Color3.fromRGB(255, 80, 200), function(new)
+local autoRefreshToggle = createToggle("Auto Refresh", false, config.accentColor, function(new)
     getgenv().hitboxRefreshEnabled = new
 end)
 autoRefreshToggle.frame.Parent = hitboxContent
 
-local intervalSlider = createSlider("Intervalo (s)", 5, 0.1, 15, "s", Color3.fromRGB(255, 80, 200), function(new)
+local intervalSlider = createSlider("Interval (s)", 5, 0.1, 15, "s", config.accentColor, function(new)
     getgenv().hitboxRefreshInterval = new
 end)
 intervalSlider.frame.Parent = hitboxContent
+
+-- ==================== CONTENIDO CONFIGURACIÓN ====================
+local configContent = Instance.new("Frame")
+configContent.Size = UDim2.new(1, 0, 1, 0)
+configContent.BackgroundTransparency = 1
+configContent.Parent = contentScroller
+configContent.Visible = false
+configContent.ZIndex = 5
+
+local configLayout = Instance.new("UIListLayout")
+configLayout.Padding = UDim.new(0, 15)
+configLayout.SortOrder = Enum.SortOrder.LayoutOrder
+configLayout.Parent = configContent
+
+-- Tecla para abrir/cerrar GUI
+local toggleKeyBtn = createKeybindButton("Toggle GUI key", "Right Control", config.toggleKey)
+toggleKeyBtn.frame.Parent = configContent
+toggleKeyBtn.button.MouseButton1Click:Connect(function()
+    isSelectingKey = true
+    toggleKeyBtn.button.Text = "Press a key..."
+    TweenService:Create(toggleKeyBtn.button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 150, 0)}):Play()
+end)
+
+-- Temas de color
+local themeLabel = Instance.new("TextLabel")
+themeLabel.Size = UDim2.new(1, 0, 0, 30)
+themeLabel.BackgroundTransparency = 1
+themeLabel.Text = "Color theme"
+themeLabel.TextColor3 = Color3.fromRGB(240, 240, 255)
+themeLabel.Font = Enum.Font.Gotham
+themeLabel.TextSize = 16
+themeLabel.TextXAlignment = Enum.TextXAlignment.Left
+themeLabel.Parent = configContent
+
+local themes = {
+    {name = "Blue Neon", primary = Color3.fromRGB(0, 180, 255), accent = Color3.fromRGB(255, 80, 200)},
+    {name = "Green Neon", primary = Color3.fromRGB(0, 255, 100), accent = Color3.fromRGB(255, 200, 0)},
+    {name = "Red Neon", primary = Color3.fromRGB(255, 50, 50), accent = Color3.fromRGB(255, 200, 50)},
+    {name = "Purple", primary = Color3.fromRGB(150, 0, 255), accent = Color3.fromRGB(255, 100, 255)},
+}
+
+local themeButtons = {}
+for i, theme in ipairs(themes) do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 100, 0, 40)
+    btn.Position = UDim2.new(0, (i-1)*110, 0, 0)
+    btn.BackgroundColor3 = theme.primary
+    btn.Text = theme.name
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.Gotham
+    btn.TextSize = 14
+    btn.Parent = configContent
+    btn.ZIndex = 6
+
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 8)
+    btnCorner.Parent = btn
+
+    btn.MouseButton1Click:Connect(function()
+        config.themeColor = theme.primary
+        config.accentColor = theme.accent
+        -- Actualizar UI
+        titleGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, config.themeColor),
+            ColorSequenceKeypoint.new(1, config.accentColor)
+        })
+        contentScroller.ScrollBarImageColor3 = config.themeColor
+        if activeTab == "trigger" then
+            activeIndicator.BackgroundColor3 = config.themeColor
+            indicatorGlow.ImageColor3 = config.themeColor
+        elseif activeTab == "hitbox" then
+            activeIndicator.BackgroundColor3 = config.accentColor
+            indicatorGlow.ImageColor3 = config.accentColor
+        end
+        showNotification("Theme", "Changed to " .. theme.name, 2, "info")
+    end)
+end
+
+-- Separador
+local separator = Instance.new("Frame")
+separator.Size = UDim2.new(1, 0, 0, 2)
+separator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+separator.BackgroundTransparency = 0.8
+separator.Parent = configContent
+separator.LayoutOrder = 10
+
+-- (Opcional: más configuraciones)
 
 -- ==================== FUNCIONALIDAD DE PESTAÑAS ====================
 local function setActiveTab(tab)
     activeTab = tab
     if tab == "trigger" then
-        TweenService:Create(activeIndicator, TweenInfo.new(0.3), {Position = UDim2.new(0, 0, 0, 30), BackgroundColor3 = Color3.fromRGB(0, 180, 255)}):Play()
-        TweenService:Create(indicatorGlow, TweenInfo.new(0.3), {ImageColor3 = Color3.fromRGB(0, 180, 255)}):Play()
-        TweenService:Create(triggerIcon, TweenInfo.new(0.3), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-        TweenService:Create(triggerText, TweenInfo.new(0.3), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-        TweenService:Create(hitboxIcon, TweenInfo.new(0.3), {TextColor3 = Color3.fromRGB(200, 200, 200)}):Play()
-        TweenService:Create(hitboxText, TweenInfo.new(0.3), {TextColor3 = Color3.fromRGB(200, 200, 200)}):Play()
+        TweenService:Create(activeIndicator, TweenInfo.new(0.3), {Position = UDim2.new(0, 0, 0, 30), BackgroundColor3 = config.themeColor}):Play()
+        TweenService:Create(indicatorGlow, TweenInfo.new(0.3), {ImageColor3 = config.themeColor}):Play()
+        triggerIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
+        triggerText.TextColor3 = Color3.fromRGB(255, 255, 255)
+        hitboxIcon.ImageColor3 = Color3.fromRGB(200, 200, 200)
+        hitboxText.TextColor3 = Color3.fromRGB(200, 200, 200)
+        configIcon.ImageColor3 = Color3.fromRGB(200, 200, 200)
+        configText.TextColor3 = Color3.fromRGB(200, 200, 200)
         triggerContent.Visible = true
         hitboxContent.Visible = false
-    else
-        TweenService:Create(activeIndicator, TweenInfo.new(0.3), {Position = UDim2.new(0, 0, 0, 120), BackgroundColor3 = Color3.fromRGB(255, 80, 200)}):Play()
-        TweenService:Create(indicatorGlow, TweenInfo.new(0.3), {ImageColor3 = Color3.fromRGB(255, 80, 200)}):Play()
-        TweenService:Create(hitboxIcon, TweenInfo.new(0.3), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-        TweenService:Create(hitboxText, TweenInfo.new(0.3), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-        TweenService:Create(triggerIcon, TweenInfo.new(0.3), {TextColor3 = Color3.fromRGB(200, 200, 200)}):Play()
-        TweenService:Create(triggerText, TweenInfo.new(0.3), {TextColor3 = Color3.fromRGB(200, 200, 200)}):Play()
+        configContent.Visible = false
+    elseif tab == "hitbox" then
+        TweenService:Create(activeIndicator, TweenInfo.new(0.3), {Position = UDim2.new(0, 0, 0, 120), BackgroundColor3 = config.accentColor}):Play()
+        TweenService:Create(indicatorGlow, TweenInfo.new(0.3), {ImageColor3 = config.accentColor}):Play()
+        hitboxIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
+        hitboxText.TextColor3 = Color3.fromRGB(255, 255, 255)
+        triggerIcon.ImageColor3 = Color3.fromRGB(200, 200, 200)
+        triggerText.TextColor3 = Color3.fromRGB(200, 200, 200)
+        configIcon.ImageColor3 = Color3.fromRGB(200, 200, 200)
+        configText.TextColor3 = Color3.fromRGB(200, 200, 200)
         triggerContent.Visible = false
         hitboxContent.Visible = true
+        configContent.Visible = false
+    else
+        TweenService:Create(activeIndicator, TweenInfo.new(0.3), {Position = UDim2.new(0, 0, 0, 210), BackgroundColor3 = Color3.fromRGB(150, 150, 150)}):Play()
+        TweenService:Create(indicatorGlow, TweenInfo.new(0.3), {ImageColor3 = Color3.fromRGB(150, 150, 150)}):Play()
+        configIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
+        configText.TextColor3 = Color3.fromRGB(255, 255, 255)
+        triggerIcon.ImageColor3 = Color3.fromRGB(200, 200, 200)
+        triggerText.TextColor3 = Color3.fromRGB(200, 200, 200)
+        hitboxIcon.ImageColor3 = Color3.fromRGB(200, 200, 200)
+        hitboxText.TextColor3 = Color3.fromRGB(200, 200, 200)
+        triggerContent.Visible = false
+        hitboxContent.Visible = false
+        configContent.Visible = true
     end
 end
 
 triggerBtn.MouseButton1Click:Connect(function() setActiveTab("trigger") end)
 hitboxBtn.MouseButton1Click:Connect(function() setActiveTab("hitbox") end)
+configBtn.MouseButton1Click:Connect(function() setActiveTab("config") end)
 
 -- ==================== MODO SELECTOR ====================
 modeSelector.holdBtn.MouseButton1Click:Connect(function()
     holdMode = true
-    TweenService:Create(modeSelector.holdBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(0, 180, 255), BackgroundTransparency = 0.2}):Play()
+    TweenService:Create(modeSelector.holdBtn, TweenInfo.new(0.3), {BackgroundColor3 = config.themeColor, BackgroundTransparency = 0.2}):Play()
     TweenService:Create(modeSelector.toggleBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(45, 45, 50), BackgroundTransparency = 0.3}):Play()
     modeSelector.holdBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     modeSelector.toggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -925,13 +1023,14 @@ modeSelector.toggleBtn.MouseButton1Click:Connect(function()
     modeSelector.holdBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
 end)
 
--- ==================== SELECCIÓN DE TECLA ====================
+-- ==================== SELECCIÓN DE TECLA (para keybinds) ====================
 keybindBtn.button.MouseButton1Click:Connect(function()
     isSelectingKey = true
     keybindBtn.button.Text = "Press a key..."
     TweenService:Create(keybindBtn.button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 150, 0), BackgroundTransparency = 0.1}):Play()
 end)
 
+-- Manejo de selección de teclas
 UserInputService.InputBegan:Connect(function(input)
     if isSelectingKey then
         if input.UserInputType == Enum.UserInputType.Keyboard then
@@ -952,6 +1051,47 @@ UserInputService.InputBegan:Connect(function(input)
     end
 end)
 
+-- Selección de tecla de toggle
+toggleKeyBtn.button.MouseButton1Click:Connect(function()
+    isSelectingKey = true
+    toggleKeyBtn.button.Text = "Press a key..."
+    TweenService:Create(toggleKeyBtn.button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 150, 0)}):Play()
+    -- Usamos la misma variable isSelectingKey, pero diferenciamos por contexto
+    -- Aquí necesitamos un manejador específico, lo haremos en InputBegan
+end)
+
+-- Ajustamos InputBegan para manejar también toggleKey
+UserInputService.InputBegan:Connect(function(input)
+    if isSelectingKey then
+        -- Primero determinamos qué botón está siendo seleccionado
+        if keybindBtn.button.BackgroundColor3 == Color3.fromRGB(255, 150, 0) then
+            -- Es para holdKey
+            if input.UserInputType == Enum.UserInputType.Keyboard then
+                holdKey = input.KeyCode
+                keybindBtn.button.Text = input.KeyCode.Name
+            elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+                holdKey = Enum.UserInputType.MouseButton1
+                keybindBtn.button.Text = "Left Click"
+            elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+                holdKey = Enum.UserInputType.MouseButton2
+                keybindBtn.button.Text = "Right Click"
+            elseif input.UserInputType == Enum.UserInputType.MouseButton3 then
+                holdKey = Enum.UserInputType.MouseButton3
+                keybindBtn.button.Text = "Middle Click"
+            end
+            TweenService:Create(keybindBtn.button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 45, 50), BackgroundTransparency = 0.3}):Play()
+        elseif toggleKeyBtn.button.BackgroundColor3 == Color3.fromRGB(255, 150, 0) then
+            -- Es para toggleKey
+            if input.UserInputType == Enum.UserInputType.Keyboard then
+                config.toggleKey = input.KeyCode
+                toggleKeyBtn.button.Text = input.KeyCode.Name
+            end
+            TweenService:Create(toggleKeyBtn.button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 45, 50), BackgroundTransparency = 0.3}):Play()
+        end
+        isSelectingKey = false
+    end
+end)
+
 -- ==================== CONTROLES DE VENTANA ====================
 minimizeBtn.MouseButton1Click:Connect(function()
     minimized = not minimized
@@ -965,8 +1105,8 @@ minimizeBtn.MouseButton1Click:Connect(function()
         minimizeBtn.Text = "□"
     else
         TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
-            Size = UDim2.new(0, 500, 0, 640),
-            Position = UDim2.new(0.5, -250, 0.5, -320)
+            Size = UDim2.new(0, 500, 0, 680),
+            Position = UDim2.new(0.5, -250, 0.5, -340)
         }):Play()
         contentContainer.Visible = true
         sidebar.Visible = true
@@ -984,14 +1124,14 @@ closeBtn.MouseButton1Click:Connect(function()
     enabled = false
 end)
 
--- Atajos: CTRL DERECHO o F6
+-- Atajo configurable
 UserInputService.InputBegan:Connect(function(input)
-    if (input.KeyCode == Enum.KeyCode.RightControl or input.KeyCode == Enum.KeyCode.F6) and not isSelectingKey then
+    if input.KeyCode == config.toggleKey and not isSelectingKey then
         guiVisible = not guiVisible
         if guiVisible then
             main.Visible = true
             TweenService:Create(main, TweenInfo.new(0.5, Enum.EasingStyle.Back), {
-                Size = UDim2.new(0, 500, 0, minimized and 60 or 640),
+                Size = UDim2.new(0, 500, 0, minimized and 60 or 680),
                 BackgroundTransparency = 0.15
             }):Play()
         else
@@ -1005,20 +1145,20 @@ UserInputService.InputBegan:Connect(function(input)
     end
 end)
 
--- Animación de entrada épica
+-- Animación de entrada
 main.Size = UDim2.new(0, 0, 0, 0)
 main.BackgroundTransparency = 1
 main.Visible = true
 task.wait(0.1)
 TweenService:Create(main, TweenInfo.new(0.8, Enum.EasingStyle.Back), {
-    Size = UDim2.new(0, 500, 0, 640),
+    Size = UDim2.new(0, 500, 0, 680),
     BackgroundTransparency = 0.15
 }):Play()
 
-showNotification("FAME CHEATS", "Edición Ultra Moderna", 3, "info")
-showNotification("CONTROLES", "CTRL DERECHO / F6", 3, "info")
+showNotification("FAME CHEATS", "Configurable Edition", 3, "info")
+showNotification("CONTROLES", "Key customizable", 3, "info")
 
--- ==================== LÓGICA DEL TRIGGERBOT (sin cambios) ====================
+-- ==================== LÓGICA DEL TRIGGERBOT ====================
 local function isKeyPressed(input)
     if typeof(holdKey) == "EnumItem" then
         if holdKey.EnumType == Enum.UserInputType then
